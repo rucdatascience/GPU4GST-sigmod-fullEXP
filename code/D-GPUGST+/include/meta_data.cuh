@@ -11,7 +11,7 @@ class meta_data
 		/*traversal*/
 		feature_t *vert_status;
 		feature_t *vert_status_prev;
-		feature_t *temp_st;
+	
 		bit_t *bitmap;
 		int width;
 		int diameter;
@@ -38,9 +38,9 @@ class meta_data
 		index_t *scan_temp_lrg;//store block sum
 
 		/*worklist*/
-		vertex_t *worklist_sml;
-		vertex_t *worklist_mid;
-		vertex_t *worklist_lrg;
+		index_t *worklist_sml;
+		index_t *worklist_mid;
+		index_t *worklist_lrg;
 		//vertex_t *worklist_sz_sml_d;
 		//vertex_t *worklist_sz_mid_d;
 		//vertex_t *worklist_sz_lrg_d;
@@ -74,7 +74,7 @@ class meta_data
 			//int blk_size = 256;
 			//int grd_size = 256;
 	
-		
+			size_t free_byte, total_byte;
 			
 			//Because thread bin is only used by the smaller kernel
 			//cudaOccupancyMaxPotentialBlockSize(&grd_size, &blk_size, 
@@ -83,7 +83,6 @@ class meta_data
 			assert(THDS_NUM <= 1024);
 			H_ERR(cudaMalloc((void **)&vert_status, FEAT_SZ*width*(diameter+1)));
 			H_ERR(cudaMalloc((void **)&vert_status_prev, FEAT_SZ*width*(diameter+1)));
-			H_ERR(cudaMalloc((void **)&temp_st, FEAT_SZ*width));
 			H_ERR(cudaMalloc((void **)&bitmap, BIT_SZ));
 			H_ERR(cudaMemset(bitmap, 0, BIT_SZ));	
 
@@ -92,9 +91,11 @@ class meta_data
 			
 			//H_ERR(cudaMalloc((void **)&worklist_sz, sizeof(vertex_t)));
 			//Workload balancing: count, prefix and collect.
+
 			H_ERR(cudaMalloc((void **)&worklist_sml,VERT_SZ*width*(diameter+1)));
-			H_ERR(cudaMalloc((void **)&worklist_mid,VERT_SZ *width*(diameter+1)));
-			H_ERR(cudaMalloc((void **)&worklist_lrg,VERT_SZ*width*(diameter+1)));
+			cudaMemGetInfo(&free_byte, &total_byte);
+			H_ERR(cudaMalloc((void **)&worklist_mid,0.25*VERT_SZ *width*(diameter+1)));
+			H_ERR(cudaMalloc((void **)&worklist_lrg,0.25*VERT_SZ*width*(diameter+1)));
 			H_ERR(cudaMalloc((void **)&cat_thd_count_sml,CATE_SZ));
 			H_ERR(cudaMalloc((void **)&cat_thd_count_mid,CATE_SZ));
 			H_ERR(cudaMalloc((void **)&cat_thd_count_lrg,CATE_SZ));
@@ -151,7 +152,7 @@ class meta_data
 			cudaFree(worklist_mid);
 			cudaFree(worklist_sml);
 			cudaFree(worklist_bin);
-			cudaFree(temp_st);
+
 
 		}
 		

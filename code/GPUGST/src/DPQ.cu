@@ -272,7 +272,7 @@ __global__ void dis0_init_1(queue_element *dis_queue, queue_element *new_dis_que
 
 
 
-void DPBF_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph,  int &real_cost, non_overlapped_group_sets s, double &rt,int &RAM,records &ret)
+void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph,  int &real_cost, non_overlapped_group_sets s, double &rt,int &RAM,records &ret)
 {
 	// cudaSetDevice(1);
 

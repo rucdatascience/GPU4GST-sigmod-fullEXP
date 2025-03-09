@@ -727,32 +727,7 @@ graph_hash_of_mixed_weighted graph_v_of_v_idealID_PrunedDPPlusPlus(graph_v_of_v_
 
 		// cout<<"after one label best "<<best_cost<<endl;
 		/*since an optimal solution has not been popped out, the optimal cost must be larger than or equal to v_X_tree_cost*/
-		if (v_X_tree_cost > 0)
-		{
-			// cout << "X:" << X << endl;
-			int ratio = best_cost / v_X_tree_cost;
-			// cout << "ratio:" << ratio << " v_X_tree_cost:" << v_X_tree_cost << endl;
-			if (ratio <= maximum_return_app_ratio + 1e-5)
-			{ // this feasible solution can be returned
-			  // std::cout<<"count "<<counts<<std::endl;
 
-				int xh = 0;
-				auto end = std::chrono::high_resolution_clock::now();
-				double runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9; // s
-				time_record = runningtime;
-				bit_num += Q_T_max_size * (sizeof(graph_v_of_v_idealID_PrunedDPPlusPlus_min_node) + 8 + sizeof(handle_graph_v_of_v_idealID_PrunedDPPlusPlus_min_node) + 8); // Q_T + Q_T_handles
-				for (size_t v = 0; v < N; v++)
-				{
-					xh += trees[v].size();
-				}
-				ret.counts = xh;
-				ret.process_queue_num = process;
-				//cout << "queue_size " << Q_T_max_size << "N*width " << N * (group_sets_ID_range + 1) << "count " << xh << endl;
-				xh += N * (group_sets_ID_range + 1) + Q_T_max_size;
-				RAM_MB = xh;
-				return best_solu;
-			}
-		}
 
 		/*Lines 17-19 in PrunedDP++*/
 		int X_slash = group_sets_ID_range - X; // p \cup X_slash equals group_sets_ID_range

@@ -154,13 +154,13 @@ __forceinline__ __device__ void _grid_scan_agg(
 	warp_scan_inc<data_t,index_t>(value_lrg,thd_id_inwarp);
 	if(thd_id_inwarp == 31) 
 	{
-		smem_sml[warp_id_inblk] = value_sml;
+		smem_sml[warp_id_inblk] = value_sml;//把一个warp的集中在value上，存储在smem上，现在smem上面每一位对应warpid的warp总任务
 		smem_mid[warp_id_inblk] = value_mid;
 		smem_lrg[warp_id_inblk] = value_lrg;
 	}
 	__syncthreads();
 
-	data_t my_warp_sum_sml = smem_sml[warp_id_inblk];
+	data_t my_warp_sum_sml = smem_sml[warp_id_inblk];//其他线程要读取这个东西，通过smem更快
 	data_t my_warp_sum_mid = smem_mid[warp_id_inblk];
 	data_t my_warp_sum_lrg = smem_lrg[warp_id_inblk];
 	
@@ -169,13 +169,13 @@ __forceinline__ __device__ void _grid_scan_agg(
 	//CTA scan: use warp scan to do CTA scan
 	data_t value2; 
 	switch (warp_id_inblk)
-	{
+	{	//选一个block的前三个warp分别执行SML
 		case 0:
 			value2 = smem_sml[thd_id_inwarp] *
-				(thd_id_inwarp < warp_count_inblk);
+				(thd_id_inwarp < warp_count_inblk);//block最大1024 也就是tid<32，warpid<32够用
 			warp_scan_inc<data_t, index_t>
 				(value2, thd_id_inwarp);
-			smem_sml[thd_id_inwarp] = value2;
+			smem_sml[thd_id_inwarp] = value2;//由此smem里面是这个block内一定范围的累加和
 			break;
 
 		case 1:
@@ -203,7 +203,7 @@ __forceinline__ __device__ void _grid_scan_agg(
 	//Grid scan: use atomic operatin to do grid scan
 	int my_sum;
 	switch (warp_id_inblk)
-	{
+	{//block的前三个warp取来分别操作SML
 		case 0:
 			my_sum = smem_sml[warp_count_inblk - 1];
 			if(!thd_id_inwarp)
@@ -211,7 +211,7 @@ __forceinline__ __device__ void _grid_scan_agg(
 				my_cta_off_sml = atomicAdd((int *)
 					total_sz_sml, my_sum);
 				smem_sml[warp_count_inblk] = 
-					my_cta_off_sml;
+					my_cta_off_sml;//把公用信息存在smem
 			}
 			break;
 
@@ -246,7 +246,7 @@ __forceinline__ __device__ void _grid_scan_agg(
 	my_cta_off_mid = smem_mid[warp_count_inblk];
 	my_cta_off_lrg = smem_lrg[warp_count_inblk];
 
-	output_sml = value_sml - input_sml +
+	output_sml = value_sml - input_sml +//分别是线程的off+warp的off
 		smem_sml[warp_id_inblk] - my_warp_sum_sml 
 		+ my_cta_off_sml;
 

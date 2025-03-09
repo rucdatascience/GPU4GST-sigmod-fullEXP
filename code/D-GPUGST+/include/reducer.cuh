@@ -25,10 +25,9 @@ public:
 	feature_t *vert_status_prev;
 	feature_t *one_label_lower_bound;
 	feature_t *one_label_h;
-	vertex_t *worklist_sml;
-	vertex_t *worklist_mid;
-	vertex_t *worklist_lrg;
-	feature_t *temp_st;
+	index_t *worklist_sml;
+	index_t *worklist_mid;
+	index_t *worklist_lrg;
 	int width, diameter;
 	volatile vertex_t *worklist_sz_sml;
 	volatile vertex_t *worklist_sz_mid;
@@ -55,7 +54,7 @@ public:
 		width = wid;
 		diameter = mdata.diameter;
 		VAL1 = width * (diameter + 1), VAL2 = (diameter + 1);
-		temp_st = mdata.temp_st;
+	
 		vert_status = mdata.vert_status;
 		vert_status_prev = mdata.vert_status_prev;
 		worklist_sml = mdata.worklist_sml;
@@ -191,70 +190,7 @@ public:
 		}
 	}
 
-	/* Coalesced scan status array to generate
-	 *non-sorted* frontier queue in push  根据状态数组的变化生成*/
-	__forceinline__ __device__ void
-	_push_coalesced_scan_single_random_list(
-		vertex_t *smem,
-		const index_t TID,
-		const index_t wid_in_blk,
-		const index_t tid_in_wrp,
-		const index_t wcount_in_blk, // 一个block里面有多少warp
-		const index_t GRNTY,
-		feature_t level)
-	{
-		vertex_t my_front_mid = 0; // frontier middle的大小
-		for (vertex_t my_beg = TID; my_beg < vert_count *  VAL1; my_beg += GRNTY)
-		{
-			if ((*vert_selector_push) // 有变化的点
-				(my_beg, level, adj_list, beg_pos,
-				 vert_status, vert_status_prev))
-			// if(vert_status[my_beg] <= K)
-			{
-				int v = my_beg / VAL1;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
 
-				my_front_mid++;
-			}
-		}
-		__syncthreads();
-		vertex_t my_front_off_mid = 0;
-
-		// For debugging
-		// cat_thd_count_mid[TID] = my_front_mid;
-
-		// prefix-scan
-		_grid_scan<vertex_t, vertex_t>(tid_in_wrp,
-									   wid_in_blk,
-									   wcount_in_blk,
-									   my_front_mid,
-									   my_front_off_mid,
-									   smem,
-									   worklist_sz_mid);
-
-		for (vertex_t my_beg = TID; my_beg < vert_count *  VAL1; my_beg += GRNTY)
-		{
-			if ((*vert_selector_push)(my_beg, level, adj_list, beg_pos,
-									  vert_status, vert_status_prev))
-			//	if(vert_status[my_beg] <= K)
-			{
-				int v = my_beg /  VAL1;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
-
-				worklist_mid[my_front_off_mid++] = my_beg; // 这里写入的已经是全局的工作队列了
-			}
-
-			if (my_beg < vert_count * VAL1)
-				// make sure already activated ones are turned off
-				if (vert_status_prev[my_beg] != vert_status[my_beg])
-					vert_status_prev[my_beg] = vert_status[my_beg]; // 变化之后的清除掉
-		}
-		__syncthreads();
-	}
 
 	__forceinline__ __device__ void
 	_push_coalesced_scan_random_list(
@@ -269,10 +205,9 @@ public:
 		vertex_t my_front_mid = 0;
 		vertex_t my_front_lrg = 0;
 
-		for (vertex_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
+		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
 		{
-			if ((*vert_selector_push)(my_beg, level, adj_list, beg_pos,
-									  vert_status, vert_status_prev))
+			if (vert_status[my_beg]!=vert_status_prev[my_beg])
 			{
 				int v = my_beg / VAL1;
 				index_t degree = beg_pos[v + 1] - beg_pos[v];
@@ -310,10 +245,9 @@ public:
 										   worklist_sz_mid,
 										   worklist_sz_lrg);
 
-		for (vertex_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
+		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
 		{
-			if ((*vert_selector_push)(my_beg, level, adj_list, beg_pos,
-									  vert_status, vert_status_prev))
+			if (vert_status[my_beg]!=vert_status_prev[my_beg])
 			{
 				int v = my_beg / VAL1;
 				index_t degree = beg_pos[v + 1] - beg_pos[v];

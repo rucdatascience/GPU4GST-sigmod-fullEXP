@@ -9,6 +9,7 @@
 #include "mapper_enactor.cuh"
 #include <thrust/detail/minmax.h>
 #include <thrust/fill.h>
+
 #define THREAD_PER_BLOCK 512
 using namespace std;
 /*user defined vertex behavior function*/
@@ -72,9 +73,9 @@ __device__ cb_reducer vert_selector_pull_d = vertex_selector_pull;
 __device__ cb_mapper vert_behave_push_d = user_mapper_push;
 __device__ cb_mapper vert_behave_pull_d = user_mapper_pull;
 /*init GST*/
-__global__ void count_used(int *tree,int val1,int val2, int width, int *counts,int D,int N)
+__global__ void count_used(int *tree,int val1,int val2, int width, uint *counts,int D,int N)
 {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	uint idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < N)
 	{
 		int vline = idx*val1;
@@ -107,23 +108,24 @@ int main(int args, char **argv)
 
 	int blk_size = 512;
 	
-	int *non_overlapped_group_gpu, *non_overlapped_group_pointer, *can_find;
+	int *non_overlapped_group_gpu, *non_overlapped_group_pointer;
 	// Read graph to CPU
 	graph<long, long, long, vertex_t, index_t, weight_t>
-		*ginst = new graph<long, long, long, vertex_t, index_t, weight_t>(file_beg_pos, file_adj_list, file_weight_list);
+	*ginst = new graph<long, long, long, vertex_t, index_t, weight_t>(file_beg_pos, file_adj_list, file_weight_list);
 	ginst->read_gi(path + data_name + ".g", path + data_name + to_string(T) + ".csv");
+	
 	int G = ginst->inquire[0].size(), V = ginst->vert_count, solve = 0;
 	int width = 1 << G;
-	int problem_size = V * width * (D + 1), sum_cost = 0;
+	uint problem_size = V * width * (D + 1), sum_cost = 0;
 	non_overlapped_group_sets s = graph_v_of_v_idealID_DPBF_non_overlapped_group_sets_gpu(width - 1);
 	cudaMallocManaged((void **)&non_overlapped_group_gpu, sizeof(int) * s.length);
 	cudaMallocManaged((void **)&non_overlapped_group_pointer, sizeof(int) * (width + 1));
 	cudaMemcpy(non_overlapped_group_gpu, s.non_overlapped_group_sets_IDs.data(), sizeof(int) * s.length, cudaMemcpyHostToDevice);
 	cudaMemcpy(non_overlapped_group_pointer, s.non_overlapped_group_sets_IDs_pointer_host.data(), (width + 1) * sizeof(int), cudaMemcpyHostToDevice);
 	meta_data mdata(ginst->vert_count, ginst->edge_count, width, D);
+	
 	std::vector<int> contain_group_vertices;
-	cout << "width " << width << " V " << V << endl;
-	int VAL1 = (1 << G) * (D + 1), VAL2 = (D + 1);
+	uint VAL1 = (1 << G) * (D + 1), VAL2 = (D + 1);
 	int *host_tree = new int[problem_size];
 	feature_t *level, *level_h;
 	cudaMalloc((void **)&level, 10 * sizeof(feature_t));
@@ -194,6 +196,7 @@ int main(int args, char **argv)
 				}
 			}
 		}
+		
 		//  for (int i = 0; i < V; i++)
 		// {
 		//     for (int j = 0; j < width; j++)
@@ -211,7 +214,7 @@ int main(int args, char **argv)
 
 		double time = wtime();
 		// mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier, 0);
-
+		
 		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);
@@ -248,12 +251,13 @@ int main(int args, char **argv)
 		}
 
 		time = wtime() - time;
-		int *set_num;
-		cudaMallocManaged((void **)&set_num,sizeof(int));
+		uint *set_num;
+		cudaMallocManaged((void **)&set_num,sizeof(uint));
 		count_used<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(mdata.vert_status,VAL1,VAL2, width, set_num,D, V);
 		cudaDeviceSynchronize();
 		//cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width*D "<<V*width*D<<endl;
-		int mem_MB = (level_h[5]+V*width*D+*set_num);
+		long long int mem_MB =level_h[5];
+		mem_MB += (V*width*D+*set_num);
 		outputFile << ii << "," << task << "," << ftime << "," << minc << "," <<mem_MB <<","<<*set_num<<","<<level_h[6]<< endl;
 
 		//std::cout << "Staged time: " << ftime << "\n"; // 三段时间

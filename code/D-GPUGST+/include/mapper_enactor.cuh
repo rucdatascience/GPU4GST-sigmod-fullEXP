@@ -119,10 +119,7 @@ balanced_push_kernel(
 
 			break;
 		}
-#ifdef ENABLE_MONITORING
-		if (!TID)
-			printf("level-%d-futurework: %d\n", (int)level, mdata.future_work[0]);
-#endif
+
 		// if(level == 1) break;
 	}
 

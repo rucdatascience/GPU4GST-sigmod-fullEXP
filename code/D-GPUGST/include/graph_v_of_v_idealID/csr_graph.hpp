@@ -112,8 +112,6 @@ inline CSR_graph toCSR(graph_v_of_v_idealID graph)
     // }
 
     int E_all = ARRAY.E_all;
-     ARRAY.ave_d/=V,ARRAY.ave_w/=E_all;
-      cout << "max degree " << maxd<<" aved and avew "<<ARRAY.ave_d<<" " <<ARRAY.ave_w<< endl;
     cudaMallocManaged(&ARRAY.all_pointer, (V + 1) * sizeof(int));
     cudaMallocManaged(&ARRAY.all_edge, E_all * sizeof(int));
     cudaMallocManaged(&ARRAY.all_edge_weight, E_all * sizeof(int));

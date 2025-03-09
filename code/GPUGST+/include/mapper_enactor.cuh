@@ -48,10 +48,7 @@ hybrid_bin_scan_push_kernel(
 	vertex_t mid_queue = mdata.worklist_sz_mid[0]; // 好像就是取了指针* 这里就是size
 	level[1] = mid_queue;
 	// printf("at level %d qsize %d\n",level_thd,mid_queue);
-#ifdef ENABLE_MONITORING
-	if (!TID)
-		printf("Entering-hybrid-bin-front-count: %d\n", mid_queue);
-#endif
+
 
 	while (true) // 这里还是一个循环任务 想要一次做完 仅当工作量到阈值时切换出去
 	{
@@ -75,10 +72,7 @@ hybrid_bin_scan_push_kernel(
 		// and generate frontiers immediately
 		global_barrier.sync_grid_opt();
 
-#ifdef ENABLE_MONITORING
-		if (!TID)
-			printf("level-%d-frontier-count: %d\n", (int)level_thd, mid_queue);
-#endif
+
 		index_t appr_work = 0;
 
 		// Online filter is included.
@@ -104,12 +98,9 @@ hybrid_bin_scan_push_kernel(
 		global_barrier.sync_grid_opt();
 		if (mdata.future_work[0] > ggraph.edge_count * SWITCH_TO && 0)
 		{
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("----->>>Switch to pull model<<<-----------\n");
-#endif
+
 			level[2] = mdata.future_work[0];
-			level[3] = 555;
+			
 			break; // 这里怎么对SSSP这种任务也是如此操作？ 当下阶段工作数量大于某个阈值 就切换了工作模式
 		}
 		// worklist_gather._push_coalesced_scan_single_random_list
@@ -118,19 +109,13 @@ hybrid_bin_scan_push_kernel(
 		if (mdata.worklist_sz_sml[0] == -1) // means overflow 溢出才重新更新一次
 		// if(true)// - Intentionally always overflow, for the purpose of test online filter overhead.
 		{ // 如果有某个节点发生溢出 那就需要重新组织全局工作队列
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("------->>>Switch to Ballot filtering<<<-------\n");
-#endif
+
 
 			worklist_gather._push_coalesced_scan_single_random_list(smem, TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd + 1);
 		}
 		else
 		{ // 如果没有节点溢出 那么可以直接从bin中的任务通过前缀和计算得到下一轮工作队列
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("--->>>>>>Online-Filter<<<<<<-----------\n");
-#endif
+
 			// Attention, its likely frontier list size goes beyond vert_count
 			_grid_scan<vertex_t, vertex_t>(tid_in_wrp,
 										   wid_in_blk,
@@ -184,8 +169,7 @@ balanced_push_kernel(
 	const index_t wcount_in_blk = blockDim.x >> 5; // 一个block里面有多少warp
 	const index_t WGRNTY = GRNTY >> 5;			   // warp stride
 
-	feature_t level_thd = level[0]; // 可能就是只用了0？？ while循环的次数
-
+	feature_t level_thd = level[0]; 
 	if (!TID)
 	{
 		mdata.best[0] = inf;
@@ -206,11 +190,11 @@ balanced_push_kernel(
 		 * should be far away after
 		 * ***if((wqueue = mdata.worklist_sz_sml[0]) == 0) break;****
 		 */
-		// 平衡
+		
 		if (!TID)
 		{   
 			mdata.worklist_sz_mid[0] = 0; // 下面应该是在扫描执行了 先把新的队列长度置0
-			mdata.worklist_sz_sml[0] = 0; // indicate whether bin overflow
+			mdata.worklist_sz_sml[0] = 0; 
 			mdata.worklist_sz_lrg[0] = 0;
 
 		}
@@ -315,10 +299,7 @@ hybrid_bin_scan_push_kernel_only(
 	vertex_t mid_queue = mdata.worklist_sz_mid[0]; // 好像就是取了指针* 这里就是size
 	level[1] = mid_queue;
 	// printf("at level %d qsize %d\n",level_thd,mid_queue);
-#ifdef ENABLE_MONITORING
-	if (!TID)
-		printf("Entering-hybrid-bin-front-count: %d\n", mid_queue);
-#endif
+
 
 	while (true) // 这里还是一个循环任务 想要一次做完 仅当工作量到阈值时切换出去
 	{
@@ -341,10 +322,7 @@ hybrid_bin_scan_push_kernel_only(
 		// compute on the graph  在图上计算并且立刻形成工作队列
 		// and generate frontiers immediately
 		global_barrier.sync_grid_opt();
-#ifdef ENABLE_MONITORING
-		if (!TID)
-			printf("level-%d-frontier-count: %d\n", (int)level_thd, mid_queue);
-#endif
+
 		index_t appr_work = 0;
 
 		// Online filter is included.
@@ -370,13 +348,10 @@ hybrid_bin_scan_push_kernel_only(
 		global_barrier.sync_grid_opt();
 		if (mdata.future_work[0] > ggraph.edge_count * SWITCH_TO && 0)
 		{
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("----->>>Switch to pull model<<<-----------\n");
-#endif
+
 			level[2] = mdata.future_work[0];
-			level[3] = 555;
-			break; // 这里怎么对SSSP这种任务也是如此操作？ 当下阶段工作数量大于某个阈值 就切换了工作模式
+			
+			break; 
 		}
 		// worklist_gather._push_coalesced_scan_single_random_list
 		//     (smem,TID, wid_in_blk, tid_in_wrp,wcount_in_blk,GRNTY,level_thd+1);
@@ -384,19 +359,13 @@ hybrid_bin_scan_push_kernel_only(
 		if (mdata.worklist_sz_sml[0] == -1) // means overflow 溢出才重新更新一次
 		// if(true)// - Intentionally always overflow, for the purpose of test online filter overhead.
 		{ // 溢出的时候使用ballot 准确算出队列
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("------->>>Switch to Ballot filtering<<<-------\n");
-#endif
+
 
 			worklist_gather._push_coalesced_scan_single_random_list(smem, TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd + 1);
 		}
 		else
 		{ // 没有溢出的时候使用就地利用 也就是online
-#ifdef ENABLE_MONITORING
-			if (!TID)
-				printf("--->>>>>>Online-Filter<<<<<<-----------\n");
-#endif
+
 			// Attention, its likely frontier list size goes beyond vert_count
 			_grid_scan<vertex_t, vertex_t>(tid_in_wrp,
 										   wid_in_blk,
@@ -481,7 +450,7 @@ int balanced_push(
 	reducer worklist_gather,
 	Barrier global_barrier)
 {
-	// 分成三种情况大中小 现在要改的函数！！！
+	// 分成三种情况大中小 
 	int blk_size = 0;
 	int grd_size = 0;
 	// cudaFuncGetAttributes
@@ -505,7 +474,7 @@ int balanced_push(
 												 worklist_gather,
 												 global_barrier);
 
-	H_ERR(cudaDeviceSynchronize());
+	cudaDeviceSynchronize();
 
 	// cudaMemcpy(mdata.sml_count_chk, mdata.cat_thd_count_sml, sizeof(index_t)*blk_size*grd_size, cudaMemcpyDeviceToHost);
 	// cudaMemcpy(mdata.mid_count_chk, mdata.cat_thd_count_mid, sizeof(index_t)*blk_size*grd_size, cudaMemcpyDeviceToHost);

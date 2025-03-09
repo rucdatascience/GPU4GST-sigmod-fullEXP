@@ -179,6 +179,7 @@ int main(int args, char **argv)
 	graph<long, long, long, vertex_t, index_t, weight_t>
 	*ginst = new graph<long, long, long, vertex_t, index_t, weight_t>(file_beg_pos, file_adj_list, file_weight_list);
 	ginst->read_gi(path + data_name + ".g", path + data_name + to_string(T) + ".csv");
+	cout<<"inquire have "<<ginst->inquire.size()<<endl;
 	int G = ginst->inquire[0].size(), V = ginst->vert_count;
 	int width = 1 << G, problem_size = V * width, sum_cost = 0;
 	non_overlapped_group_sets s = graph_v_of_v_idealID_DPBF_non_overlapped_group_sets_gpu(width - 1);
@@ -192,7 +193,6 @@ int main(int args, char **argv)
 	meta_data mdata(ginst->vert_count, ginst->edge_count, width);
 	std::vector<int> contain_group_vertices, costs(100);
 	std::vector<double> times(100);
-	cout << "width " << width << " V " << V << endl;
 	int *host_tree = new int[width * V], *inqueue = new int[problem_size];int *one_label_h = new int[width * V];
 	int w[G * G * width], w1[G * width], vv[G][G];
 	std::fill(inqueue, inqueue + problem_size, 0);

@@ -229,7 +229,7 @@ void read_Group(std::string instance_name, graph_v_of_v_idealID &input_graph, gr
 		exit(1);																  // end the program
 	}
 }
-void read_inquire(std::string instance_name, std::vector<std::vector<int>> &inquire)
+void read_inquire(std::string instance_name, std::vector<std::vector<unsigned int>> &inquire)
 {
 	//cout << "open inquire " <<instance_name<<endl;
 	std::string line_content;

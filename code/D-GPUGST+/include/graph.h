@@ -18,8 +18,8 @@ typedef struct non_overlapped_group_sets{
 }non_overlapped_group_sets;
 void set_max_ID(graph_v_of_v_idealID &group_graph, std::vector<int> &cumpulsory_group_vertices, int *host_tree, std::vector<int> &contain_group_vertices,int width,int D)
 {
-	int bit_num = 1, v;
-	int val1 = width*(D+1),val2 = D+1;
+	uint bit_num = 1, v;
+	uint val1 = width*(D+1),val2 = D+1;
 	for (auto it = cumpulsory_group_vertices.begin(); it != cumpulsory_group_vertices.end(); it++, bit_num <<= 1)
 	{
 		for (size_t to = 0; to < group_graph[*it].size(); to++)
@@ -112,7 +112,7 @@ class graph
 			//non_overlapped_group_sets((1<<(this->inquire[0].size())-1));
 		};
 };
-int get_max(int vertex, int *host_tree, int width,int val1,int val2)
+int get_max(uint vertex, int *host_tree, int width,uint val1,uint val2)
 {
 	int re = 0;
 	for (size_t i = 1; i < width; i <<= 1)

@@ -64,7 +64,7 @@ public:
 		best = mdata.best;
 		merge_or_grow = mdata.merge_or_grow;
 		lb_record = mdata.lb_record;
-		temp_st = mdata.temp_st;
+		
 		vert_status = mdata.vert_status;
 		vert_status_prev = mdata.vert_status_prev;
 		worklist_sml = mdata.worklist_sml;
@@ -201,64 +201,7 @@ public:
 			}
 		}
 	}
-	__forceinline__ __device__ void
-	_push_coalesced_scan_single_random_list_best(
-		vertex_t *smem,
-		const index_t TID,
-		const index_t wid_in_blk,
-		const index_t tid_in_wrp,
-		const index_t wcount_in_blk, // 一个block里面有多少warp
-		const index_t GRNTY,
-		feature_t level)
-	{
-
-		vertex_t my_front_mid = 0; // frontier middle的大小
-		for (vertex_t my_beg = TID; my_beg < vert_count * width; my_beg += GRNTY)
-		{
-			if ((*vert_selector_push_best)(my_beg, width, vert_status, vert_status_prev, one_label_lower_bound, best, lb_record, merge_or_grow, temp_st))
-			{
-				int v = my_beg / width;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
-
-				my_front_mid++;
-			}
-		}
-		__syncthreads();
-		vertex_t my_front_off_mid = 0;
-
-		// For debugging
-		// cat_thd_count_mid[TID] = my_front_mid;
-
-		// prefix-scan
-		_grid_scan<vertex_t, vertex_t>(tid_in_wrp,
-									   wid_in_blk,
-									   wcount_in_blk,
-									   my_front_mid,
-									   my_front_off_mid,
-									   smem,
-									   worklist_sz_mid);
-
-		for (vertex_t my_beg = TID; my_beg < vert_count * width; my_beg += GRNTY)
-		{
-			if ((*vert_selector_push_best)(my_beg, width, vert_status, vert_status_prev, one_label_lower_bound, best, lb_record, merge_or_grow, temp_st))
-			{
-				int v = my_beg / width;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
-
-				worklist_mid[my_front_off_mid++] = my_beg; // 这里写入的已经是全局的工作队列了
-			}
-
-			if (my_beg < vert_count * width)
-				// make sure already activated ones are turned off
-				if (vert_status_prev[my_beg] != vert_status[my_beg])
-					vert_status_prev[my_beg] = vert_status[my_beg]; // 变化之后的清除掉
-		}
-		__syncthreads();
-	}
+	
 	/* Coalesced scan status array to generate
 	 *non-sorted* frontier queue in push  根据状态数组的变化生成*/
 	__forceinline__ __device__ void
@@ -356,12 +299,12 @@ public:
 		int vw = vert_count * width;
 		for (vertex_t my_beg = TID; my_beg < vw; my_beg += GRNTY)
 		{	
-			if(vert_status[my_beg]!=vert_status_prev[my_beg])
+			if(merge_or_grow[my_beg])
 			{
 
 				int v = my_beg / width, p = my_beg % width;
 				int x_slash = width - 1 - p, vline = v * width;
-				if (vert_status[vline + x_slash == inf])
+				if (vert_status[vline + x_slash] == inf)
 				{
 					int complement = 0;
 					for (int i = 1; i <= x_slash; i <<= 1)
@@ -379,7 +322,7 @@ public:
 					atomicMin((int*)best, new_value);
 				}
 			}
-			if(vert_status[my_beg]-50>(*best)/2)
+			if(vert_status[my_beg]-2>(*best)/2)
 			{
 				merge_or_grow[my_beg]=0;
 				continue;

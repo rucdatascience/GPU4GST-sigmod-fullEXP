@@ -88,7 +88,7 @@ public:
 		assert(THDS_NUM <= 1024);
 		H_ERR(cudaMalloc((void **)&vert_status, FEAT_SZ * width));
 		H_ERR(cudaMalloc((void **)&vert_status_prev, FEAT_SZ * width));
-		H_ERR(cudaMalloc((void **)&temp_st, FEAT_SZ * width));
+		H_ERR(cudaMalloc((void **)&temp_st, FEAT_SZ));
 		H_ERR(cudaMalloc((void **)&lb_record, FEAT_SZ * width)); // for compute
 		H_ERR(cudaMalloc((void **)&record, FEAT_SZ * width));	 // one label
 		H_ERR(cudaMalloc((void **)&lb0, FEAT_SZ * width));		 // w1 w2
@@ -102,8 +102,8 @@ public:
 		// H_ERR(cudaMalloc((void **)&worklist_sz, sizeof(vertex_t)));
 		// Workload balancing: count, prefix and collect.
 		H_ERR(cudaMalloc((void **)&worklist_sml, VERT_SZ * width));
-		H_ERR(cudaMalloc((void **)&worklist_mid, VERT_SZ * width));
-		H_ERR(cudaMalloc((void **)&worklist_lrg, VERT_SZ * width));
+		H_ERR(cudaMalloc((void **)&worklist_mid,0.5* VERT_SZ * width));
+		H_ERR(cudaMalloc((void **)&worklist_lrg, 0.5*VERT_SZ * width));
 		// H_ERR(cudaMalloc((void **)&new_worklist_sml, VERT_SZ * width));
 		// H_ERR(cudaMalloc((void **)&new_worklist_mid, VERT_SZ * width));
 		// H_ERR(cudaMalloc((void **)&new_worklist_lrg, VERT_SZ * width));

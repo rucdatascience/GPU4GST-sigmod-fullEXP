@@ -41,10 +41,10 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 {
 	std::cout << "start.. " << endl;
 
-	std::vector<int> generated_group_vertices;
-	std::unordered_set<int> generated_group_vertices_hash;
+	std::vector<unsigned int> generated_group_vertices;
+	std::unordered_set<unsigned int> generated_group_vertices_hash;
 	graph_hash_of_mixed_weighted instance_graph, generated_group_graph;
-	std::vector<std::vector<int>> inquire;
+	std::vector<std::vector<unsigned int>> inquire;
 	graph_v_of_v_idealID v_generated_group_graph, v_instance_graph;
 
 	int ov = read_input_graph(path + data_name + ".in", v_instance_graph);
@@ -58,8 +58,6 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	CSR_graph csr_graph = toCSR(v_instance_graph);
 	std::cout << "E: " << csr_graph.E_all << " V: " << csr_graph.V << endl;
 	read_inquire(path + data_name + to_string(T) + ".csv", inquire);
-	std::vector<int> cpu_costs(100);
-	std::vector<double> cpu_times(100);
 	int iteration_times = inquire.size();
 	std::cout << "inquires size " << inquire.size() << " G = " << inquire[0].size() << endl;
 	int group_sets_ID_range = pow(2, T) - 1;
@@ -98,11 +96,11 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 		{
 
 			int cost;
-			int RAM;
+			long long int RAM;
 			auto begin = std::chrono::high_resolution_clock::now();
 			double runningtime;
 			records ret;
-			graph_hash_of_mixed_weighted solu = DPBF_gpu(csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, D, &runningtime, cost,RAM,ret);
+			graph_hash_of_mixed_weighted solu = DP_gpu(csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, D, &runningtime, cost,RAM,ret);
 			auto end = std::chrono::high_resolution_clock::now();
 			//	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9;
 			// cost = graph_hash_of_mixed_weighted_sum_of_ec(solu);
@@ -117,7 +115,7 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 			std::cout << "------------------------------------------------------------" << endl;
 		}
 	}
-			cudaFree(csr_graph.all_edge);
+		cudaFree(csr_graph.all_edge);
 		cudaFree(csr_graph.all_pointer);
 		cudaFree(csr_graph.all_edge_weight);
 	outputFile << endl;

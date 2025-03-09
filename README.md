@@ -1,28 +1,28 @@
 # Optimal Group Steiner Tree Search on GPUs
 
 ## GST_data
-The dataset of the paper is stored on [Zenodo](https://zenodo.org/records/14790187) for download. In the following code, the dataset is stored in the "data" folder by default. There are six datasets: Github, Twitch, Youtube, Orkut, DBLP, Reddit. There are 8 files for each dataset. For example, the Github dataset contains the following 8 files:
-1. "Github.in". This readable file contains the basic information of this dataset. The two numbers on the first line of the file represent the number of vertices and edges in the graph. The following lines have three numbers representing the two end vertices and the weight of an edge. For example, "18 14919 100" shows that there is an edge between vertex 18 and vertex 14919, with an edge weight of 100.
+The dataset of the paper is stored on [Onedrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S) for download. In the following code, the dataset is stored in the "data" folder by default. There are eight datasets: Twitch, Musae, Github,  Youtube, Orkut, DBLP, Reddit, LiveJournal. There are 8 files for each dataset. For example, the Twitch dataset contains the following 8 files:
+1. "Twitch.in". This readable file contains the basic information of this dataset. The two numbers on the first line of the file represent the number of vertices and edges in the graph. The following lines have three numbers representing the two end vertices and the weight of an edge. For example, "18 14919 100" shows that there is an edge between vertex 18 and vertex 14919, with an edge weight of 100.
 
-2. "Github_beg_pos.bin". This is a binary file. The original file has V elements, each element representing the starting position of a vertex's adjacency list. Therefore, the position of a vertex can be obtained by subtracting the starting position of the next vertex from the starting position of that vertex.
+2. "Twitch_beg_pos.bin". This is a binary file. The original file has V elements, each element representing the starting position of a vertex's adjacency list. Therefore, the position of a vertex can be obtained by subtracting the starting position of the next vertex from the starting position of that vertex.
 
-3. "Github_csr.bin". This is a binary file. The original file has E elements, and this file stores an adjacency list of vertices, where each element represents an endpoint of an edge.
+3. "Twitch_csr.bin". This is a binary file. The original file has E elements, and this file stores an adjacency list of vertices, where each element represents an endpoint of an edge.
 
-4. "Github_weight.bin". This is a binary file. The original file has E elements, which store the weights of edges, with each element representing the weight of an edge.
+4. "Twitch_weight.bin". This is a binary file. The original file has E elements, which store the weights of edges, with each element representing the weight of an edge.
 
-5. "Github.g". Each line of this file represents which vertices in the graph are included in a group. For example, "g7:2705 13464 16088 16341 22323" indicates that group 7 contains five vertices: 2705, 13464, 16088, 16341, and 22323.
+5. "Twitch.g". Each line of this file represents which vertices in the graph are included in a group. For example, "g7:2705 13464 16088 16341 22323" indicates that group 7 contains five vertices: 2705, 13464, 16088, 16341, and 22323.
 
-6. "Github3.csv". Each line of this file represents a query of size 3. For example, "2475 2384 159" indicates that the return tree of this query must contain group 2475, 2384, and 159.
+6. "Twitch3.csv". Each line of this file represents a query of size 3. For example, "2475 2384 159" indicates that the return tree of this query must contain group 2475, 2384, and 159.
 
-7. "Github4.csv". Each line of this file represents a query of size 4. For example, "88824 76098 119691 83143" indicates that the return tree of this query must contain group 88824, 76098, 119691, and 83143.
+7. "Twitch5.csv". Each line of this file represents a query of size 5. For example, "1016 2941 1613 1105 2228" indicates that the return tree of this query must contain group 1016, 2941, 1613, 1105, 2228.
 
-8. "Github5.csv". Each line of this file represents a query of size 5. For example, "7 1535 901 297 1561" indicates that the return tree of this query must contain group 7, 1535, 901, 297, and 1561.
+8. "Twitch7.csv". Each line of this file represents a query of size 7. For example, "3137 393 742 25 2125 2122 727" indicates that the return tree of this query must contain group 3137, 393, 742, 25, 2125, 2122, 727.
 ## Running code example
 Here, we show how to build and run experiment on a Linux server with the Ubuntu 20.04 system, an Intel(R) Xeon(R) Platinum 8360Y CPU @ 2.40GHz, and 1 NVIDIA GeForce RTX A6000 GPU. The environment is as follows:
 - gcc version 9.3.0 (GCC)
 - CUDA compiler NVIDIA 11.8.89
 - cmake version 3.28.3
-
+- Boost
 We will provide a detailed introduction to the experimental process as follows.
 
 In your appropriate directory, execute the following commands:
@@ -35,7 +35,7 @@ Switch the working directory to GPUGST.
 ```
 cd GPUGST
 ```
-Download the dataset from [Zenodo](https://zenodo.org/records/14790187). Assume that the dataset is located in the "data" folder of the working directory GPUGST.
+Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory GPUGST.
 
 
 
@@ -46,13 +46,13 @@ sh sh/example.sh
  ```
 The experiment results will be automatically saved as CSV files in the "data/result" folder.
 
-Run a complete experiment of six algorithms on six datasets using run.sh. Execute 300 queries of sizes 3, 4, and 5 on each dataset. The running instruction is:
+Run a complete experiment of six algorithms on one datasets using run.sh. Execute 300 queries of sizes 3, 5, and 7. The running instruction is:
 
  ```
-sh sh/run.sh
+sh sh/exp_one_dataset.sh
  ```
 
-The other six sh files correspond to complete experiments of an algorithm on six datasets, with 300 queries of sizes 3, 4, and 5 executed on each dataset. For example, to run an experiment on GPUGST+, using instruction:
+The other six sh files correspond to complete experiments of an algorithm on eight datasets, with 300 queries of sizes 3, 5, and 7 executed on each dataset. For example, to run an experiment on GPUGST+, using instruction:
 
  ```
 sh sh/exp_GPUGST+.sh

@@ -66,8 +66,6 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	}
 	std::cout << "E: " << csr_graph.E_all << " V: " << csr_graph.V << endl;
 	read_inquire(path + data_name  + to_string(T) + ".csv", inquire);
-	std::vector<int> cpu_costs(100);
-	std::vector<double> cpu_times(100);
 	int iteration_times = inquire.size();
 	std::cout << "inquires size " << inquire.size() << " G = " << inquire[0].size() << endl;
 	int group_sets_ID_range = pow(2, T) - 1;
@@ -75,7 +73,7 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 
 	/*iteration*/
 	std::cout << "------------------------------------------------------------" << endl;
-	int rounds = 0, cpu_cost, gpu_cost;
+	int rounds = 0;
 
 	/*output*/
 	ofstream outputFile;
@@ -121,7 +119,7 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 			auto begin = std::chrono::high_resolution_clock::now();
 			double runningtime;
 			records ret;
-			DPBF_GPU(host_tree, host_tree_one_d, csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, cost, s, runningtime,RAM,ret);
+			DP_GPU(host_tree, host_tree_one_d, csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, cost, s, runningtime,RAM,ret);
 			auto end = std::chrono::high_resolution_clock::now();
 			//	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9;
 			// cost = graph_hash_of_mixed_weighted_sum_of_ec(solu);
