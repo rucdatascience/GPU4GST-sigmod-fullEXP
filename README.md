@@ -29,13 +29,13 @@ In your appropriate directory, execute the following commands:
 
 Download the code:
 ```
-git clone https://github.com/toziki/GPUGST.git
+git clone https://github.com/toziki/TrimCDP.git
 ```
-Switch the working directory to GPUGST.
+Switch the working directory to TrimCDP.
 ```
-cd GPUGST
+cd TrimCDP
 ```
-Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory GPUGST.
+Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory TrimCDP.
 
 
 
@@ -52,10 +52,10 @@ Run a complete experiment of six algorithms on one datasets using run.sh. Execut
 sh sh/exp_one_dataset.sh
  ```
 
-The other six sh files correspond to complete experiments of an algorithm on eight datasets, with 300 queries of sizes 3, 5, and 7 executed on each dataset. For example, to run an experiment on GPUGST+, using instruction:
+The other six sh files correspond to complete experiments of an algorithm on eight datasets, with 300 queries of sizes 3, 5, and 7 executed on each dataset. For example, to run an experiment on TrimCDP-WB, using instruction:
 
  ```
-sh sh/exp_GPUGST+.sh
+sh sh/exp_TrimCDP-WB.sh
  ```
 Taking example.sh as an example, explain the contents of the sh file as follows:
 ```
@@ -73,11 +73,11 @@ This instruction executes the executable file, specifying the query size, the da
 ## GST_code
 All code is located in the 'Code' folder. There are six subfolders, each corresponding to the code of one of the six experiments in section 5.1 of the paper.
 - PrunedDP++. This is the PrunedDP++ version code of GST without diameter constraints.
-- GPUGST. This is the GPUGST version code without diameter constraint for GST.
-- GPUGST+. This is the GPUGST+ version code without diameter constraint for GST.
+- TrimCDP. This is the TrimCDP version code without diameter constraint for GST.
+- TrimCDP-WB. This is the TrimCDP-WB version code without diameter constraint for GST.
 - D-PrunedDP++. This is the PrunedDP++ version code with diameter constraints for GST.
-- D-GPUGST. This is the GPUGST version code with diameter constraints for GST.
-- D-GPUGST+. This is the GPUGST+ version code with diameter constraints for GST.
+- D-TrimCDP. This is the TrimCDP version code with diameter constraints for GST.
+- D-TrimCDP-WB. This is the TrimCDP-WB version code with diameter constraints for GST.
 
 In the six subfolders, there are .h, .cu, .cuh, and .cpp files used for conducting the experiments described in the paper. The .h and .cuh files are in the "include" directory, while the .cpp files are in the "src" directory. The following explanation uses code without diameter constraints as an example, and code with diameter constraints is similar.
 
@@ -88,14 +88,14 @@ In the six subfolders, there are .h, .cu, .cuh, and .cpp files used for conducti
 
 
 ### GPU
-- "GPUGST/src/main.cpp" contains the code for conducting the experiment in the paper. 
-- "GPUGST/include/exp_GPU_nonHop.h" contains code for reading in the graph, group, and queries.
-- "GPUGST/src/DPQ.cu" contains the algorithm code.
+- "TrimCDP/src/main.cpp" contains the code for conducting the experiment in the paper. 
+- "TrimCDP/include/exp_GPU_nonHop.h" contains code for reading in the graph, group, and queries.
+- "TrimCDP/src/DPQ.cu" contains the algorithm code.
 
 
 ### GPU+
-- "GPUGST+/src/GSTnonHop.cu" contains the code for conducting the experiment in the paper. It also completes the tasks of reading in the graph, group, and queries.
-- "GPUGST+/include/mapper_enactor.cuh" contains the overall framework of the algorithm.
-- "GPUGST+/include/mapper.cuh" contains the code for performing specific operations on vertices, such as grow and merge operations.
-- "GPUGST+/include/reducer.cuh" contains the code for organizing and allocating work after completing vertices operations.
+- "TrimCDP-WB/src/GSTnonHop.cu" contains the code for conducting the experiment in the paper. It also completes the tasks of reading in the graph, group, and queries.
+- "TrimCDP-WB/include/mapper_enactor.cuh" contains the overall framework of the algorithm.
+- "TrimCDP-WB/include/mapper.cuh" contains the code for performing specific operations on vertices, such as grow and merge operations.
+- "TrimCDP-WB/include/reducer.cuh" contains the code for organizing and allocating work after completing vertices operations.
 
