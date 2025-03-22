@@ -24,7 +24,7 @@ In your appropriate directory, execute the following commands:
 
 Download the code:
 ```
-git clone https://github.com/toziki/TrimCDP.git
+git clone https://anonymous.4open.science/r/GPU4GST/
 ```
 Switch the working directory to TrimCDP.
 ```
