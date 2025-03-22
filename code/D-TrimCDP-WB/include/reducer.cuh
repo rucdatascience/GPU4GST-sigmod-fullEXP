@@ -200,7 +200,7 @@ public:
 		const index_t WCOUNT,
 		const index_t GRNTY,
 		feature_t level)
-	{ // 三合一生成运行队列的函数
+	{
 		vertex_t my_front_sml = 0;
 		vertex_t my_front_mid = 0;
 		vertex_t my_front_lrg = 0;

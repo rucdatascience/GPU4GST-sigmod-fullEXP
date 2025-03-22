@@ -20,8 +20,6 @@ balanced_push_kernel(
 	Barrier global_barrier)
 {
 
-	// 从CPU函数传递来的第一层核函数
-	// 核函数 这里的上一层已经调用起全部线程了
 	//__shared__ vertex_t smem[32]; // 32位共享内存
 	const index_t TID = threadIdx.x + blockIdx.x * blockDim.x;
 	const index_t GRNTY = blockDim.x * gridDim.x;
@@ -31,20 +29,19 @@ balanced_push_kernel(
 	const index_t wcount_in_blk = blockDim.x >> 5; // 一个block里面有多少warp
 	const index_t WGRNTY = GRNTY >> 5;			   // warp stride
 
-	feature_t level_thd = level[0]; // 可能就是只用了0？？ while循环的次数
+	feature_t level_thd = level[0]; 
 	
 
 	if (!TID)
 	{level[6]=0;
-		mdata.worklist_sz_mid[0] = 0; // 如果TID是0 把全局的中等大小列表置0 那这里最初就必须全部放在mid了
+		mdata.worklist_sz_mid[0] = 0;
 		
 	}
 
 	global_barrier.sync_grid_opt();
-	// 下面这个函数扫描了线程对应的点 加入了工作队列
-	//  所有线程共同做上面这一项任务 取出来的任务数量也是一样的
+
 	int r=0;
-	while (true&&++r<20) // 这里还是一个循环任务 想要一次做完 仅当工作量到阈值时切换出去
+	while (true&&++r<20)
 	{
 		// 平衡
 		mdata.future_work[0] = 0;
@@ -61,19 +58,16 @@ balanced_push_kernel(
 			level[5] = tot;
 
 		}
-		// worklist_gather._push_coalesced_scan_random_list(TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd+1);
+
 		worklist_gather._push_coalesced_scan_random_list(TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd + 1);
-		// compute on the graph  在图上计算并且立刻形成工作队列
-		// and generate frontiers immediately
+
 		global_barrier.sync_grid_opt();
 		if (mdata.worklist_sz_sml[0] +
 				mdata.worklist_sz_mid[0] +
 				mdata.worklist_sz_lrg[0] ==
 			0)
 			break;
-		// global_barrier.sync_grid_opt();
 
-		// Three push mappers.
 
 		compute_mapper.mapper_push(
 			mdata.worklist_sz_lrg[0],
@@ -115,12 +109,11 @@ balanced_push_kernel(
 
 		global_barrier.sync_grid_opt();
 		if (mdata.future_work[0] > ggraph.edge_count * SWITCH_TO && 0)
-		{ // pull和剪枝技术的兼容应该是问题 暂时不考虑
+		{ 
 
 			break;
 		}
 
-		// if(level == 1) break;
 	}
 
 	if (!TID)
@@ -148,10 +141,7 @@ int balanced_push(
 
 	grd_size = (blk_size * grd_size) / cfg_blk_size;
 	blk_size = cfg_blk_size;
-	// grd_size = (blk_size * grd_size)/ 128;
-	// blk_size = 128;
 
-	//printf("balanced push-- block=%d, grid=%d\n", blk_size, grd_size);
 	assert(blk_size * grd_size <= BLKS_NUM * THDS_NUM);
 
 	// push_pull_opt_kernel
@@ -166,15 +156,6 @@ int balanced_push(
 	H_ERR(cudaDeviceSynchronize());
 	
 	
-	// cudaMemcpy(mdata.sml_count_chk, mdata.cat_thd_count_sml, sizeof(index_t)*blk_size*grd_size, cudaMemcpyDeviceToHost);
-	// cudaMemcpy(mdata.mid_count_chk, mdata.cat_thd_count_mid, sizeof(index_t)*blk_size*grd_size, cudaMemcpyDeviceToHost);
-	// cudaMemcpy(mdata.lrg_count_chk, mdata.cat_thd_count_lrg, sizeof(index_t)*blk_size*grd_size, cudaMemcpyDeviceToHost);
-
-	// index_t total_count = 0;
-	// for(int i = 0; i < blk_size * grd_size; i++)
-	//     total_count+=mdata.sml_count_chk[i] + mdata.mid_count_chk[i] + mdata.lrg_count_chk[i];
-
-	// printf("---debug total count: %ld\n", total_count);
 	return 0;
 }
 

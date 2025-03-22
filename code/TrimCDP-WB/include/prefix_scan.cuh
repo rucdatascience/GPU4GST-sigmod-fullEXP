@@ -45,19 +45,7 @@ __forceinline__ __device__ void _grid_sum(
 	smem[threadIdx.x] = input;
 	__syncthreads();
 
-//	if (blockDim.x >= 1024) {if (threadIdx.x < 512) smem[threadIdx.x] += smem[threadIdx.x + 512]; __syncthreads();}
-//	if (blockDim.x >= 512) {if (threadIdx.x < 256) smem[threadIdx.x] += smem[threadIdx.x + 256]; __syncthreads();}
-//	if (blockDim.x >= 256) {if (threadIdx.x < 128) smem[threadIdx.x] += smem[threadIdx.x + 128]; __syncthreads();}
-//	if (blockDim.x >= 128) {if (threadIdx.x < 64) smem[threadIdx.x] += smem[threadIdx.x + 64]; __syncthreads();}
-//	if(threadIdx.x < 32)
-//	{
-//		if (blockDim.x >= 64) smem[threadIdx.x] += smem[threadIdx.x + 32];
-//		if (blockDim.x >= 32) smem[threadIdx.x] += smem[threadIdx.x + 16];
-//		if (blockDim.x >= 16) smem[threadIdx.x] += smem[threadIdx.x + 8];
-//		if (blockDim.x >= 8) smem[threadIdx.x] += smem[threadIdx.x + 4];
-//		if (blockDim.x >= 4) smem[threadIdx.x] += smem[threadIdx.x + 2];
-//		if (blockDim.x >= 2) smem[threadIdx.x] += smem[threadIdx.x + 1];
-//	}
+
 
     int idx=blockDim.x>>1;
     while(idx)
@@ -88,7 +76,7 @@ __forceinline__ __device__ void _grid_scan(
 ){
 	data_t value = input;
 	data_t my_cta_off = 0;
-	//大概是通过逐级的同步 warp到CTA再到grid这样的顺序同步得到前缀和
+
 	//Warp scan: Kogge stone inclusive scan
 	warp_scan_inc<data_t, index_t>(value,thd_id_inwarp);
 	

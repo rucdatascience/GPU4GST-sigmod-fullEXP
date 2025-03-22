@@ -127,10 +127,10 @@ public:
 	// function
 	// Could represent thread, warp, cta, grid grained thread scheduling
 	__forceinline__ __device__ void
-	mapper_push_atomic(	 // 这个是大中小都使用的push函数 这里会进行更新新的距离
-		vertex_t wqueue, // 这个是本轮的用值
+	mapper_push_atomic(	 
+		vertex_t wqueue, 
 		vertex_t *worklist,
-		index_t *cat_thd_count, // 这个是本轮返回值
+		index_t *cat_thd_count, 
 		const index_t GRP_ID,
 		const index_t GRP_SZ,
 		const index_t GRP_COUNT,
@@ -245,7 +245,7 @@ public:
 		}
 	}
 	__forceinline__ __device__ void
-	mapper_push(		 // 这个是大中小都使用的push函数 这里会进行更新新的距离
+	mapper_push(		 
 		vertex_t wqueue, // 这个是本轮的用值
 		vertex_t *worklist,
 		index_t *cat_thd_count, // 这个是本轮返回值
@@ -275,8 +275,7 @@ public:
 				weight = weight_list[j];
 				vertex_t update_dest = vert_end * width + p;
 				feature_t dist = vert_status[frontier] + weight;
-				// feature_t dist = (*edge_compute_push)(frontier, update_dest,
-				// 									  level, beg_pos, weight, vert_status, vert_status_prev); // 获取值 根据任务选择操作
+
 			
 				if (vert_status[update_dest] > dist)
 				{
@@ -307,15 +306,14 @@ public:
 			}
 		}
 
-		// note, we use cat_thd_count to store the future amount of workload
-		// and such data is important for switching between push - pull models.
+
 		cat_thd_count[threadIdx.x + blockIdx.x * blockDim.x] = appr_work;
 	}
 
 	
 	__device__ __forceinline__ int get_lb(feature_t *status, feature_t *lb0, int vline, int x_slash)
 	{
-		// 计算lower bound需要的参数 ： 状态status 要计算的v,p
+		
 		int ret = 0;
 		for (int i = 1; i <= x_slash; i <<= 1)
 		{
@@ -329,7 +327,7 @@ public:
 	}
 	__device__ __forceinline__ int get_lb_m(feature_t *status, feature_t *lb0, int vline, int x_slash, int w)
 	{
-		// 计算lower bound需要的参数 ： 状态status 要计算的v,p
+		
 		int ret = 0;
 		for (int i = 1; i <= x_slash; i <<= 1)
 		{
@@ -343,10 +341,10 @@ public:
 		return ret;
 	}
 	__device__ __forceinline__ void
-	mapper_bin_push( // 最初SSSP调用的函数
+	mapper_bin_push( 
 		index_t &appr_work,
 		volatile vertex_t *overflow_indicator,
-		vertex_t &my_front_count, // 初值为0 传引用
+		vertex_t &my_front_count, 
 		vertex_t *worklist_bin,	  // 也是工作队列
 		vertex_t wqueue,		  // 传进来的时候只有这个是队列大小
 		vertex_t *worklist,		  // 这个是工作队列
@@ -358,7 +356,7 @@ public:
 		index_t bin_off,
 		volatile vertex_t *bests,
 		feature_t *records,
-		feature_t *lb_record)		 // 规定的线程bin大小是32 （有溢出可能是在这里
+		feature_t *lb_record)		 
 	{								 // 从任务队列中获得对各个指向点的更新值 并且根据这些值对对应位置更新
 		const vertex_t WSZ = wqueue; // 遍历工作队列
 
@@ -403,8 +401,7 @@ public:
 				lb_record[update_dest] = lb;
 				if (vert_status[update_dest] > dist)
 				{
-					// atomicMin does not return mininum
-					// instead the old val, in this case vert_status[vert_end].
+
 					if (atomicMin(vert_status + update_dest, dist) > dist)
 						if (dist + lb <= (*bests))
 						{
@@ -443,7 +440,7 @@ public:
 					// instead the old val, in this case vert_status[vert_end].
 					if (atomicMin(vert_status + update_dest, dist) > dist)
 
-						if (dist - 1 <= 0.667 * (*bests) && dist + lb <= (*bests)) // 0.667 不能换成2/3 否则跑不出结果
+						if (dist - 1 <= 0.667 * (*bests) && dist + lb <= (*bests)) // 0.667 
 						{
 							if (my_front_count < BIN_SZ)
 							{

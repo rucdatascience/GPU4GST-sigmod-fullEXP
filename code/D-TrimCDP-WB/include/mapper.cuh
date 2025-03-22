@@ -56,16 +56,7 @@ public:
 		val1 = width * (diameter + 1), val2 = (diameter + 1);
 		merge_groups = ggraph.merge_groups_d;
 		merge_pointer = ggraph.merge_pointer_d;
-		// 		for (size_t i = 0; i < width; i++)
-		// {
-		// 	cout<<i<<"  "<<"begin "<< merge_pointer[i] <<" end "<< merge_pointer[i+1]<<" ";
-		// 	for (size_t j = merge_pointer[i]; j <merge_pointer[i+1]; j++)
-		// 	{
-		// 		cout<<	merge_groups[j]<<" ";
-		// 	}
-		// 	cout<<endl;
-		// }
-		
+
 
 		vert_count = ggraph.vert_count;
 		vert_status = mdata.vert_status;
@@ -79,8 +70,6 @@ public:
 	~mapper() {}
 
 public:
-	// function
-	// Could represent thread, warp, cta, grid grained thread scheduling
 
 	__forceinline__ __device__ void
 	mapper_push(		 // 这个是大中小都使用的push函数 这里会进行更新新的距离
@@ -130,23 +119,17 @@ public:
 				uint p_comp = merge_groups[j];
 				for (uint dia = 0; dia <= diameter - d; dia++)
 				{
-					// printf("m");
-					// if (v * val1 + p_comp * val2 + dia > mxid || v * val1 + p_comp * val2 + dia < 0) {
-					// 	printf("1222");
-					// }
+	
 					weight_t weight = vert_status[v * val1 + p_comp * val2 + dia];
 					uint new_d = dia>d?dia:d;
 					
 					index_t update_dest = v * val1 + (p_comp | p) * val2 + new_d;
-					// if (update_dest > mxid || update_dest < 0) {
-					// 	printf("1234");
-					// }
+
 					if (frontier > mxid) {
 						printf("123");
 					}
 					dist = vert_status[frontier] + weight;
-						// dist = (*edge_compute_push)(frontier, update_dest,//极其奇怪的bug 这个函数不能替换成上面语句？
-						// 							level, beg_pos, weight, vert_status, vert_status_prev); // 获取值 根据任务选择操作
+
 					if (vert_status[update_dest] > dist)
 					{
 						

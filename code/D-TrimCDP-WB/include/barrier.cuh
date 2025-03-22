@@ -1,11 +1,7 @@
 #ifndef _BARRIER_H_
 #define _BARRIER_H_
 
-/*
-   Attention!!!!
- * For debugging purpose, Barrier needs very low amount of threads
- *
- */
+
 
 #include "util.h"
 
@@ -18,10 +14,6 @@ __device__ __forceinline__ int ThreadLoad(int *ptr)
 		return retval;  
 }
 
-//__device__ __forceinline__ void ThreadStore(volatile int *ptr, int val)
-//{
-//	asm volatile ("st.global.s32 [%0], %1;" : "+l"(ptr): "r"(val));
-//}
 
 class Barrier {
 	
@@ -33,8 +25,7 @@ class Barrier {
 		}
 
 		virtual ~Barrier(){
-			//printf("Barrier is deleted\n");
-			//cudaFree(d_lock);
+
 		}
 	public:
 

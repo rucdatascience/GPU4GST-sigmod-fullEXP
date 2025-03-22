@@ -441,17 +441,7 @@ int main(int args, char **argv)
 		sum_cost += minc;
 		// balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 
-		// if (switch_iter != 0)
-		// {
-		// 	// mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// 	// 下面是一个基于拉取的函数 从工作队列的邻居取值更新
-		// 	mapper_merge_pull(blk_size, switch_iter, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// 	stime = wtime() - time - ftime; // 当前减去开始时间是到现在的耗时 再减去一阶段是二阶段耗时
-		// 	mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// 	mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// 	mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// 	// balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
-		// }
+	
 		// cudaMemcpy(inqueue, mdata.merge_or_grow, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 

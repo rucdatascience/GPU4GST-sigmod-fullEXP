@@ -17,10 +17,7 @@ thread_stride_gather(
 		reducer reducer_inst
 ){
 	const index_t TID = threadIdx.x + blockIdx.x * blockDim.x;
-	//const index_t GRNTY = blockDim.x * gridDim.x;
-	//const index_t WOFF = threadIdx.x & 31;
-	//const index_t wid_in_blk = threadIdx.x >> 5;
-	//const index_t wcount_in_blk = blockDim.x >> 5;
+
 	const index_t BIN_OFF = TID * BIN_SZ;
 
 	//worklist_gather._thread_stride_gather

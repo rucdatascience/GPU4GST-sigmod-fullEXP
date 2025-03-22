@@ -41,14 +41,7 @@ class meta_data
 		index_t *worklist_sml;
 		index_t *worklist_mid;
 		index_t *worklist_lrg;
-		//vertex_t *worklist_sz_sml_d;
-		//vertex_t *worklist_sz_mid_d;
-		//vertex_t *worklist_sz_lrg_d;
 
-		/*thread bin
-		 * - for generate frontier queue while map
-		 *   instead of scan and generate frontier queue
-		 * */
 		vertex_t *worklist_bin;
 		volatile vertex_t *worklist_sz_sml;
 		volatile vertex_t *worklist_sz_mid;
@@ -88,9 +81,6 @@ class meta_data
 
 			//Thread-bin for frontier generation
 			H_ERR(cudaMalloc((void **)&worklist_bin,GBIN_SZ));
-			
-			//H_ERR(cudaMalloc((void **)&worklist_sz, sizeof(vertex_t)));
-			//Workload balancing: count, prefix and collect.
 
 			H_ERR(cudaMalloc((void **)&worklist_sml,VERT_SZ*width*(diameter+1)));
 			cudaMemGetInfo(&free_byte, &total_byte);
@@ -118,20 +108,6 @@ class meta_data
 			H_ERR(cudaMalloc((void **)&worklist_sz_lrg,sizeof(vertex_t)));
 			H_ERR(cudaMalloc((void **)&best,sizeof(vertex_t)));
 					
-			//for frontier queue size report
-			//Allocated on CPU, mapped to GPU
-			//H_ERR(cudaHostAlloc((void **)&worklist_sz_sml,
-			//			sizeof(index_t),cudaHostAllocMapped));
-			//H_ERR(cudaHostGetDevicePointer((void **)&worklist_sz_sml_d,
-			//			worklist_sz_sml,0));
-			//H_ERR(cudaHostAlloc((void **)&worklist_sz_mid,
-			//			sizeof(index_t),cudaHostAllocMapped));
-			//H_ERR(cudaHostGetDevicePointer((void **)&worklist_sz_mid_d,
-			//			worklist_sz_mid,0));
-			//H_ERR(cudaHostAlloc((void **)&worklist_sz_lrg,
-			//			sizeof(index_t),cudaHostAllocMapped));
-			//H_ERR(cudaHostGetDevicePointer((void **)&worklist_sz_lrg_d,
-			//			worklist_sz_lrg,0));
 
 			stream = (cudaStream_t *)malloc(sizeof(cudaStream_t)*3);
 			for(index_t i=0;i<3;++i)

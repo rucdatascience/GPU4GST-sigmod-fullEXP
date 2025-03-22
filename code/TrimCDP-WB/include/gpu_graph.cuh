@@ -1,4 +1,4 @@
-// 10/03/2016
+
 // Graph data structure on GPUs
 #ifndef _GPU_GRAPH_H_
 #define _GPU_GRAPH_H_
