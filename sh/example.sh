@@ -1,19 +1,19 @@
 #sh sh/example.sh
-# cd code/D-PrunedDP++
-# mkdir build
-# cd build
-# cmake ..
-# make 
-# ./bin/D-PrunedDP++ 2 ../../../data/ Twitch 5 4 0 10
+cd code/D-PrunedDP++
+mkdir build
+cd build
+cmake ..
+make 
+./bin/D-PrunedDP++ 2 ../../../data/ Twitch 5 4 0 10
 
-# cd ../../../code/PrunedDP++
-# mkdir build
-# cd build
-# cmake ..
-# make 
-#  ./bin/PrunedDP++ 1 ../../../data/ Twitch 5 0 10
+cd ../../../code/PrunedDP++
+mkdir build
+cd build
+cmake ..
+make 
+ ./bin/PrunedDP++ 1 ../../../data/ Twitch 5 0 10
 
-cd code/TrimCDP
+cd ../../../code/TrimCDP
 mkdir build
 cd build
 cmake ..
