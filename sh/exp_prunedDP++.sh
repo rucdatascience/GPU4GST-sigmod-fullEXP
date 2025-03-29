@@ -1,4 +1,6 @@
-cd code/PrunedDP++/build
+cd code/PrunedDP++
+mkdir build
+cd build
 cmake ..
 make
 #exe type path data_name T task_start_num(from 0) task_end_num

@@ -1,4 +1,6 @@
-cd code/D-TrimCDP/build
+cd code/D-TrimCDP
+mkdir build
+cd build
 cmake ..
 make
 #exe type path data_name T  D task_start_num(from 0) task_end_num

@@ -1,7 +1,8 @@
 cd code/D-TrimCDP-WB/build
-cmake .. 
+mkdir build
+cd build
+cmake ..
 make
-
 #exe type path data_name T  D task_start_num(from 0) task_end_num
  #./bin/D-TrimCDP-WB 2 ../../../data/ Twitch 3 4 0 49
 ./bin/D-TrimCDP-WB 2 ../../../data/ Musae 3 4 0 299

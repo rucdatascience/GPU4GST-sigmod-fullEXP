@@ -1,4 +1,6 @@
-cd code/TrimCDP/build
+cd code/TrimCDP
+mkdir build
+cd build
 cmake .. 
 make
 #sh sh/run_exp_GPU1_nonHop.sh
