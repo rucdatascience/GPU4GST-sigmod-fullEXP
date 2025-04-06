@@ -120,10 +120,6 @@ hybrid_bin_scan_push_kernel(
 		global_barrier.sync_grid_opt();
 		if ((mid_queue = mdata.worklist_sz_mid[0]) == 0)
 			break;
-#ifndef __VOTE__
-		for (index_t i = TID; i < ggraph.vert_count; i += GRNTY)
-			mdata.vert_status_prev[i] = mdata.vert_status[i];
-#endif
 		level_thd++;
 
 		

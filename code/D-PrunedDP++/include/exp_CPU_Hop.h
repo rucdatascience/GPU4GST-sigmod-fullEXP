@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <queue>
-#include <omp.h>
 #include <boost/heap/fibonacci_heap.hpp>
 #include <graph_hash_of_mixed_weighted/graph_hash_of_mixed_weighted.h>
 #include <graph_hash_of_mixed_weighted/common_algorithms/graph_hash_of_mixed_weighted_connected_components.h>
