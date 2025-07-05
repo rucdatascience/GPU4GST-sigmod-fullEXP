@@ -98,7 +98,7 @@ public:
 			{
 				for (index_t j = beg + THD_OFF; j < end; j += GRP_SZ)
 				{
-					// printf("");
+					// printf("1");
 					index_t vert_end = adj_list[j];
 					weight = weight_list[j];
 					index_t update_dest = vert_end * val1 + p * val2  +d+ 1;
@@ -145,6 +145,7 @@ public:
 	}
 
 	
+
 
 	
 

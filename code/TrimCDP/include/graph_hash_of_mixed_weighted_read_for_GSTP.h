@@ -67,7 +67,7 @@ void graph_hash_of_mixed_weighted_read_for_GSTP(std::string instance_name,
 	{
 		std::cout << "Unable to open file " << instance_name << std::endl
 				  << "Please check the file location or file name." << std::endl; // throw an error message
-		getchar();																  // keep the console window
+																		  // keep the console window
 		exit(1);																  // end the program
 	}
 }
@@ -91,7 +91,7 @@ int read_input_graph(std::string instance_name, graph_v_of_v_idealID &input_grap
 		while (getline(myfile, line_content)) // read file line by line
 		{
 			std::vector<std::string> Parsed_content = parse_string(line_content, " ");
-		if (Parsed_content.size()==3)
+			if (Parsed_content.size() == 3)
 			{
 				int v1 = std::stoi(Parsed_content[0]);
 				int v2 = std::stoi(Parsed_content[1]);
@@ -142,7 +142,7 @@ int read_input_graph(std::string instance_name, graph_v_of_v_idealID &input_grap
 	{
 		std::cout << "Unable to open file " << instance_name << std::endl
 				  << "Please check the file location or file name." << std::endl; // throw an error message
-		getchar();																  // keep the console window
+																		  // keep the console window
 		exit(1);																  // end the program
 	}
 }
@@ -182,7 +182,7 @@ void graph_hash_of_mixed_weighted_read_for_Group(std::string instance_name,
 	{
 		std::cout << "Unable to open file " << instance_name << std::endl
 				  << "Please check the file location or file name." << std::endl; // throw an error message
-		getchar();																  // keep the console window
+																		  // keep the console window
 		exit(1);																  // end the program
 	}
 }
@@ -233,7 +233,7 @@ void read_Group(std::string instance_name, graph_v_of_v_idealID &input_graph, gr
 	{
 		std::cout << "Unable to open file " << instance_name << std::endl
 				  << "Please check the file location or file name." << std::endl; // throw an error message
-		getchar();																  // keep the console window
+																		  // keep the console window
 		exit(1);																  // end the program
 	}
 }
@@ -280,10 +280,54 @@ void read_inquire(std::string instance_name, std::vector<std::vector<int>> &inqu
 	{
 		std::cout << "Unable to open file " << instance_name << std::endl
 				  << "Please check the file location or file name." << std::endl; // throw an error message
-		getchar();																  // keep the console window
+																		  // keep the console window
 		exit(1);																  // end the program
 	}
 }
+
+void read_tree_weight(std::string instance_name, std::vector<int> &tree_weight)
+{
+	// cout << "open inquire " <<instance_name<<endl;
+	std::string line_content;
+	std::ifstream myfile(instance_name); // open the file
+	tree_weight.clear();
+	tree_weight.resize(300);
+	if (myfile.is_open()) // if the file is opened successfully
+	{
+		cout << "success open tree " << instance_name << endl;
+		getline(myfile, line_content);
+		int i = 0;
+		while (getline(myfile, line_content)) // read file line by line
+		{
+			if (line_content[line_content.length() - 1] == ' ')
+			{
+				line_content.erase(line_content.length() - 1);
+			}
+			std::vector<std::string> Parsed_content = parse_string(line_content, ",");
+			if (Parsed_content.size() != 10)
+			{
+				continue;
+			}
+			int v = std::stoi(Parsed_content[3]);
+			tree_weight[i] = v;
+			i++;
+		}
+		for (size_t i = 0; i < 5; i++)
+		{
+			cout<<tree_weight[i]<<" ";
+		}
+		cout<<endl;
+
+		std::cout << "success read res over " << std::endl;
+		myfile.close(); // close the file
+	}
+	else
+	{
+		std::cout << "Unable to open file " << instance_name << std::endl
+				  << "Please check the file location or file name." << std::endl; // throw an error message														  // end the program
+	}
+}
+
 void write_result_cpu(std::string instance_name, std::vector<double> &times, std::vector<int> &costs, std::string tail)
 {
 	std::cout << "writes " << endl;

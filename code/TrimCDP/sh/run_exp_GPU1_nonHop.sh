@@ -3,7 +3,7 @@ cmake ..  -D CMAKE_CXX_COMPILER=/home/lijiayu/cc/gcc-9.3.0/bin/g++ -D CMAKE_C_CO
 make
 #sh sh/run_exp_GPU1_nonHop.sh
 #exe type path data_name T task_start_num(from 0) task_end_num
- ./bin/DPBF 2 /home/lijiayu/dgst/data/ twitch 3 2 20
+ ./bin/DPBF 2 /home/lijiayu/dgst/data/ Twitch 3 0 20
 #./bin/DPBF 2 /home/lijiayu/dgst/data/ twitch 4 0 299
 # ./bin/DPBF 2 /home/lijiayu/dgst/data/ twitch 5 0 299
 # ./bin/DPBF 2 /home/lijiayu/dgst/data/ Github 3 0 299

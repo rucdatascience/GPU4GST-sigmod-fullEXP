@@ -15,11 +15,11 @@ make
 
 ./bin/PrunedDP++ 1 ../../../data/ Github 3 0 299&
 ./bin/PrunedDP++ 1 ../../../data/ Github 5 0 299&
-./bin/PrunedDP++ 1 ../../../data/ Github 7 0 299&
+./bin/PrunedDP++ 1 ../../../data/ Github 7 0 299
 
 ./bin/PrunedDP++ 1 ../../../data/ Orkut 3 0 299&
 ./bin/PrunedDP++ 1 ../../../data/ Orkut 5 0 299&
-./bin/PrunedDP++ 1 ../../../data/ Orkut 7 0 299&
+./bin/PrunedDP++ 1 ../../../data/ Orkut 7 0 299
 
 ./bin/PrunedDP++ 1 ../../../data/ Youtube 3 0 299&
 ./bin/PrunedDP++ 1 ../../../data/ Youtube 5 0 299&

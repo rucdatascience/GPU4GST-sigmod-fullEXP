@@ -57,8 +57,12 @@ typedef struct node
 	int p1, p2;		// if this tree is built by merge, then it's built by merge T(v,p1) and T(v,p2);
 } node;
 struct records
+
 {   int process_queue_num;
     int counts;
+    int mid_process_queue_num;
+    int mid_counts;
+    double mid_time;
 };
-void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph,int &real_cost, non_overlapped_group_sets s,double &rt,int &RAM,records &ret);
+void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph,int &real_cost, non_overlapped_group_sets s,double &rt,int &RAM,records &ret,int res_weight);
 #endif

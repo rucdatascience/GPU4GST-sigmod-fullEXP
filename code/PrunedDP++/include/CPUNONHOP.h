@@ -102,11 +102,8 @@ class graph_v_of_v_idealID_PrunedDPPlusPlus_tree_node
 
 public:
 	int type; // =0: this is the single vertex v; =1: this tree is built by grown; =2: built by merge
-
 	int cost; // cost of this tree T(v,p);
-
 	int u; // if this tree is built by grown, then it's built by growing edge (v,u);
-
 	int p1, p2; // if this tree is built by merge, then it's built by merge T(v,p1) and T(v,p2);
 };
 #pragma endregion graph_v_of_v_idealID_PrunedDPPlusPlus_tree_node

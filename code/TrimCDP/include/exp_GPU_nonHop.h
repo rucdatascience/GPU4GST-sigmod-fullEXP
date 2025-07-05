@@ -40,8 +40,8 @@ non_overlapped_group_sets graph_v_of_v_idealID_DPBF_non_overlapped_group_sets_gp
 void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, int task_end_num)
 {
 	std::cout << "start.. " << endl;
-
-	std::vector<int> generated_group_vertices;
+	
+	std::vector<int> generated_group_vertices,tree_weight;
 	std::unordered_set<int> generated_group_vertices_hash;
 	std::vector<std::vector<int>> inquire;
 	graph_v_of_v_idealID v_generated_group_graph, v_instance_graph;
@@ -66,11 +66,11 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	}
 	std::cout << "E: " << csr_graph.E_all << " V: " << csr_graph.V << endl;
 	read_inquire(path + data_name  + to_string(T) + ".csv", inquire);
+	read_tree_weight(path+"rerun_result/new_exp_GPU1_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv",tree_weight);
 	int iteration_times = inquire.size();
 	std::cout << "inquires size " << inquire.size() << " G = " << inquire[0].size() << endl;
 	int group_sets_ID_range = pow(2, T) - 1;
 	non_overlapped_group_sets s = graph_v_of_v_idealID_DPBF_non_overlapped_group_sets_gpu(group_sets_ID_range);
-
 	/*iteration*/
 	std::cout << "------------------------------------------------------------" << endl;
 	int rounds = 0;
@@ -80,9 +80,9 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"result/exp_GPU1_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"rerun_result/new_exp_GPU1_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
-	outputFile << "task_ID,task,GPU1_nonHop_time,GPU_nonHop_cost,GPU_nonHop_memory,counts,process_num" << endl;
+	outputFile << "task_ID,task,GPU1_nonHop_time,GPU_nonHop_cost,GPU_nonHop_memory,counts,process_num,mid_counts,mid_process_num,mid_time" << endl;
 	node **host_tree;
 	int height = csr_graph.V, width = group_sets_ID_range + 1;
 	host_tree = new node *[height];
@@ -95,7 +95,7 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	for (int i = task_start_num; i <= task_end_num; i++)
 	{
 		rounds++;
-
+		
 		std::cout << data_name << " iteration " << i << endl;
 
 		string task = "";
@@ -119,11 +119,13 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 			auto begin = std::chrono::high_resolution_clock::now();
 			double runningtime;
 			records ret;
-			DP_GPU(host_tree, host_tree_one_d, csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, cost, s, runningtime,RAM,ret);
+			//cout<<"i "<<i<<" tree_weight "<<tree_weight[i]<<endl;
+			int res_weight = tree_weight[i];
+			DP_GPU(host_tree, host_tree_one_d, csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, cost, s, runningtime,RAM,ret,res_weight);
 			auto end = std::chrono::high_resolution_clock::now();
 			//	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9;
 			// cost = graph_hash_of_mixed_weighted_sum_of_ec(solu);
-			outputFile << i << "," << task << "," << runningtime << "," << cost << "," << RAM <<","<<ret.counts<<"," <<ret.process_queue_num<< endl;
+			outputFile << i << "," << task << "," << runningtime << "," << cost << "," << RAM <<","<<ret.counts<<"," <<ret.process_queue_num<<","<<ret.mid_counts<<","<<ret.mid_process_queue_num<<","<<ret.mid_time<< endl;
 			ave+=runningtime;
 			std::cout << "GPU cost: " << cost  << endl;
 			// if (!this_is_a_feasible_solution_gpu(solu, v_generated_group_graph, generated_group_vertices))

@@ -42,6 +42,7 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	std::cout << "start.. " << endl;
 
 	std::vector<unsigned int> generated_group_vertices;
+	std::vector<int> tree_weight;
 	std::unordered_set<unsigned int> generated_group_vertices_hash;
 	graph_hash_of_mixed_weighted instance_graph, generated_group_graph;
 	std::vector<std::vector<unsigned int>> inquire;
@@ -58,6 +59,7 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	CSR_graph csr_graph = toCSR(v_instance_graph);
 	std::cout << "E: " << csr_graph.E_all << " V: " << csr_graph.V << endl;
 	read_inquire(path + data_name + to_string(T) + ".csv", inquire);
+	read_tree_weight(path+"rerun_result/new_exp_GPU1_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv",tree_weight);
 	int iteration_times = inquire.size();
 	std::cout << "inquires size " << inquire.size() << " G = " << inquire[0].size() << endl;
 	int group_sets_ID_range = pow(2, T) - 1;
@@ -72,9 +74,9 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"result/exp_GPU1_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"rerun_result/new_exp_GPU1_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
-	outputFile << "task_ID,task,GPU1_Hop_time,GPU1_Hop_cost,GPU1_Hop_memory,counts,process_num" << endl;
+	outputFile << "task_ID,task,GPU1_Hop_time,GPU1_Hop_cost,GPU1_Hop_memory,counts,process_num,mid_counts,mid_process_num,mid_time" << endl;
 
 	for (int i = task_start_num; i <= task_end_num; i++)
 	{
@@ -100,11 +102,13 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 			auto begin = std::chrono::high_resolution_clock::now();
 			double runningtime;
 			records ret;
-			graph_hash_of_mixed_weighted solu = DP_gpu(csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, D, &runningtime, cost,RAM,ret);
+			cout<<"tree_weight "<<tree_weight[i]<<endl;
+			graph_hash_of_mixed_weighted solu = DP_gpu(csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, D, &runningtime, cost,RAM,ret,tree_weight[i]);
+			cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
 			auto end = std::chrono::high_resolution_clock::now();
 			//	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9;
 			// cost = graph_hash_of_mixed_weighted_sum_of_ec(solu);
-			outputFile << i << "," << task << "," << runningtime << "," << cost << "," <<RAM<<","<<ret.counts<<","<<ret.process_queue_num << endl;
+			outputFile << i << "," << task << "," << runningtime << "," << cost << "," <<RAM<<","<<ret.counts<<","<<ret.process_queue_num<<","<<ret.mid_counts<<","<<ret.mid_process_queue_num<<","<<ret.mid_time << endl;
 
 			std::cout << "GPU cost: " << cost<< endl;
 			// if (!this_is_a_feasible_solution_gpu(solu, v_generated_group_graph, generated_group_vertices))

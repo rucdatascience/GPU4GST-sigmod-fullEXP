@@ -291,7 +291,49 @@ void read_inquire(std::string instance_name, std::vector<std::vector<unsigned in
 	}
 	 outfile.close(); // 关闭文件
 }
+void read_tree_weight(std::string instance_name, std::vector<int> &tree_weight)
+{
+	// cout << "open inquire " <<instance_name<<endl;
+	std::string line_content;
+	std::ifstream myfile(instance_name); // open the file
+	tree_weight.clear();
+	tree_weight.resize(300);
+	if (myfile.is_open()) // if the file is opened successfully
+	{
+		cout << "success open tree " << instance_name << endl;
+		getline(myfile, line_content);
+		int i = 0;
+		while (getline(myfile, line_content)) // read file line by line
+		{
+			if (line_content[line_content.length() - 1] == ' ')
+			{
+				line_content.erase(line_content.length() - 1);
+			}
+			std::vector<std::string> Parsed_content = parse_string(line_content, ",");
+			if (Parsed_content.size() != 10)
+			{
+				continue;
+			}
+			int v = std::stoi(Parsed_content[3]);
+			tree_weight[i] = v;
+			i++;
+		}
+		for (size_t i = 0; i < 5; i++)
+		{
+			cout<<tree_weight[i]<<" ";
+		}
+		cout<<endl;
 
+		std::cout << "success read res over " << std::endl;
+		myfile.close(); // close the file
+	}
+	else
+	{
+		std::cout << "Unable to open file " << instance_name << std::endl
+				  << "Please check the file location or file name." << std::endl; // throw an error message
+																		  // keep the console window															  // end the program
+	}
+}
 void write_result_gpu(std::string instance_name, std::vector<double> &times,std::vector<int> &costs,string tail)
 {
 	std::cout << "writes " << endl;

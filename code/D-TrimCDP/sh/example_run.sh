@@ -3,8 +3,8 @@ cmake ..
 make
 #sh sh/example_run.sh
 #exe type path data_name T  D task_start_num(from 0) task_end_num
-./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ Reddit 7 4 0 1
-# ./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ twitch 4 4 0 1999
+
+ ./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ Github 5 7 0 0
 # ./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ twitch 5 4 0 1999
 # ./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ Github 3 4 0 1999
 # ./bin/D-TrimCDP 2 /home/lijiayu/gst6/data/ Github 4 4 0 1999

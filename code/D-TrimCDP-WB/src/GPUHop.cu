@@ -73,7 +73,7 @@ __device__ cb_reducer vert_selector_pull_d = vertex_selector_pull;
 __device__ cb_mapper vert_behave_push_d = user_mapper_push;
 __device__ cb_mapper vert_behave_pull_d = user_mapper_pull;
 /*init GST*/
-__global__ void count_used(int *tree,int val1,int val2, int width, uint *counts,int D,int N)
+__global__ void count_used(int *tree,int val1,int val2, int width, unsigned long long int *counts,int D,int N)
 {
 	uint idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < N)
@@ -101,7 +101,7 @@ int main(int args, char **argv)
 	string file_beg = path + data_name + "_beg_pos.bin";
 	string file_adj = path + data_name + "_csr.bin";
 	string file_weight = path + data_name + "_weight.bin";
-
+	cudaSetDevice(3);
 	const char *file_beg_pos = file_beg.c_str();
 	const char *file_adj_list = file_adj.c_str();
 	const char *file_weight_list = file_weight.c_str();
@@ -154,7 +154,7 @@ int main(int args, char **argv)
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"result/exp_GPU2_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"D-KF-NoSM/exp_GPU2_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU2_Hop_time,GPU2_Hop_cost,GPU2_Hop_memory,counts,process_num" << endl;
 
@@ -174,6 +174,7 @@ int main(int args, char **argv)
 		std::cout << "------------------------------------------------------------" << endl;
 		cout << data_name << " interation " << ii << " "<<endl;
 		string task = "";
+		
 		for (size_t j = 0; j < ginst->inquire[ii].size(); j++)
 		{
 			task += to_string(ginst->inquire[ii][j]) + " ";
@@ -214,8 +215,8 @@ int main(int args, char **argv)
 
 		double time = wtime();
 		// mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier, 0);
-		
 		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
+		//balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);
 		//std::cout << "first round iteration: " << level_h[0] << " queue size " << level_h[1] << " future work " << level_h[2] << " overflow " << level_h[3] << "\n";
@@ -251,13 +252,13 @@ int main(int args, char **argv)
 		}
 
 		time = wtime() - time;
-		uint *set_num;
-		cudaMallocManaged((void **)&set_num,sizeof(uint));
+		unsigned long long int *set_num;
+		cudaMallocManaged((void **)&set_num,sizeof(unsigned long long int));
 		count_used<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(mdata.vert_status,VAL1,VAL2, width, set_num,D, V);
 		cudaDeviceSynchronize();
 		//cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width*D "<<V*width*D<<endl;
 		long long int mem_MB =level_h[5];
-		mem_MB += (V*width*D+*set_num);
+		mem_MB += ((long long int)V*width*D+*set_num);
 		outputFile << ii << "," << task << "," << ftime << "," << minc << "," <<mem_MB <<","<<*set_num<<","<<level_h[6]<< endl;
 
 		//std::cout << "Staged time: " << ftime << "\n"; // 三段时间

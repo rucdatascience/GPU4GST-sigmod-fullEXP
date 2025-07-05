@@ -64,7 +64,7 @@ __global__ void Relax(
     queue_element_d *queue, uint *queue_size,
     queue_element_d *queue2, uint *queue_size2,
     uint *host_tree, uint *updated, 
-    uint VAL1, uint VAL2, uint group_sets_ID_range, uint D) 
+    uint VAL1, uint VAL2, uint group_sets_ID_range, uint D,int *tree_weight) 
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < *queue_size) {
@@ -73,6 +73,10 @@ __global__ void Relax(
         uint p = now.p;
         uint d = now.d;
         if (p == group_sets_ID_range) {
+            if(*tree_weight == host_tree[v * VAL1 + p * VAL2 + d] )
+            {
+                *tree_weight = -1;
+            }
             return;
         }
         //grow
@@ -140,9 +144,14 @@ __global__ void count_set(uint *tree,uint val1,uint val2,uint width,uint inf, ui
 		}
 	}
 }
-graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int D,double *rt,int &real_cost,long long int &RAM,records &ret)
+graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int D,double *rt,int &real_cost,long long int &RAM,records &ret, int res_weight)
 
 {
+    cudaSetDevice(3);
+    int *tree_weight;
+    cudaMallocManaged((void **)&tree_weight, sizeof(int));
+	*tree_weight = res_weight;
+    
     uint N = input_graph.size();
     uint G = cumpulsory_group_vertices.size();
     uint group_sets_ID_range = (1 << G) - 1;
@@ -197,7 +206,9 @@ graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpuls
     
     auto pbegin = std::chrono::high_resolution_clock::now();
     long long int tot_process = 0;
-    int rounds = 0;
+    int rounds = 0,first_set=0;
+    uint *counts;
+    cudaMallocManaged((void **)&counts,sizeof(uint));
     while (*queue_size > 0) {
        // cout<<"rounds "<<rounds++<<endl;
         cudaMemset(updated, 0, V * sizeof(uint));
@@ -208,12 +219,23 @@ graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpuls
             queue, queue_size,
             queue2, queue_size2,
             host_tree, updated, 
-            VAL1, VAL2, group_sets_ID_range, D
+            VAL1, VAL2, group_sets_ID_range, D,tree_weight
                                                     );
         cudaDeviceSynchronize();
 
         //the function get the prefix sum of updated
         //?
+        if (*tree_weight == -1&&first_set==0)
+		{
+			first_set=1;
+			auto mid_end = std::chrono::high_resolution_clock::now();
+			ret.mid_time = std::chrono::duration_cast<std::chrono::nanoseconds>(mid_end - pbegin).count() / 1e9;
+			count_set<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(host_tree,VAL1,VAL2,width,inf,N,D,counts);
+			cudaDeviceSynchronize();
+			ret.mid_counts = *counts;
+			ret.mid_process_queue_num = tot_process;
+			cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
+		}
         swap(queue, queue2);
         swap(queue_size, queue_size2);
         max_queue_size = max(max_queue_size,*queue_size);
@@ -243,14 +265,16 @@ graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpuls
   
     Q.push(pos);
  
-   	uint *counts;
-	cudaMallocManaged((void **)&counts,sizeof(uint));
+   	
+	*counts = 0;
 	count_set<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(host_tree,VAL1,VAL2,width,inf,N,D,counts);
     cudaDeviceSynchronize();
     ret.counts = *counts;
     ret.process_queue_num = tot_process;
     RAM = (*counts);
+    
 	RAM += max_queue_size+N*width*D;
+    cout<<*counts<<" "<<max_queue_size<<" "<<N*width*D<<" "<<RAM<<endl;
     cudaFree(host_tree);
     cudaFree(queue);
     cudaFree(queue2);

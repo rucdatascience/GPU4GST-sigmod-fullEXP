@@ -59,7 +59,10 @@ struct node
 struct records
 {   int process_queue_num;
     int counts;
+    int mid_process_queue_num;
+    int mid_counts;
+    double mid_time;
 };
-graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<unsigned int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int D,double *rt,int &real_cost,long long int &RAM,records &ret);
+graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<unsigned int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int D,double *rt,int &real_cost,long long int &RAM,records &ret, int res_weight);
 graph_hash_of_mixed_weighted DPBF_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int *pointer1, int *real_cost, non_overlapped_group_sets s,double *rt);
 #endif

@@ -168,7 +168,14 @@ int main(int args, char **argv)
 	string file_beg = path + data_name + "_beg_pos.bin";
 	string file_adj = path + data_name + "_csr.bin";
 	string file_weight = path + data_name + "_weight.bin";
-
+	 cudaDeviceProp prop;
+	 cudaSetDevice(3);
+    for (int i = 0; i < 4; i++) {
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, i);
+    std::cout << "Device Number: " << i << std::endl;
+    std::cout << "  Device name:                " << prop.name << std::endl;
+}
 	const char *file_beg_pos = file_beg.c_str();
 	const char *file_adj_list = file_adj.c_str();
 	const char *file_weight_list = file_weight.c_str();
@@ -230,7 +237,7 @@ int main(int args, char **argv)
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"result/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"KF-NoSM/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU2_nonHop_time,GPU2_nonHop_cost,GPU2_nonHop_memory,counts,process_num" << endl;
 	Barrier global_barrier(BLKS_NUM);
@@ -282,7 +289,7 @@ int main(int args, char **argv)
 		std::fill(host_tree, host_tree + problem_size, inf);
 		cudaMemcpy(mdata.vert_status_prev, host_tree, problem_size * sizeof(int), cudaMemcpyHostToDevice);
 		
-	std::fill(inqueue, inqueue + problem_size, 0);
+		std::fill(inqueue, inqueue + problem_size, 0);
 		set_max_ID(ginst->group_graph, ginst->inquire[ii], host_tree, contain_group_vertices, width); // 在置初值前传递参数到prev
 		for (auto it = contain_group_vertices.begin(); it != contain_group_vertices.end(); it++)
 		{
@@ -411,7 +418,7 @@ int main(int args, char **argv)
 		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);
-		//std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " future work " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5] << "\n";
+		std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " record best " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5]<<"total"<<level_h[6] << "\n";
 		cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// for (size_t i = 0; i < V; i++)
 		// {
@@ -482,7 +489,7 @@ int main(int args, char **argv)
 		count_used<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(mdata.vert_status, width, set_num, V);
 		cudaDeviceSynchronize();
 		int mem_MB = (level_h[5]+V*width+*set_num);
-		//cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
+		cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
 		outputFile << ii << "," << task << "," << ftime << "," << minc << "," << mem_MB<<","<<*set_num<<","<<level_h[6] << endl;
 		sum_time += ftime;
 		// std::cout << "Total iteration: " << level_h[0] << "\n";

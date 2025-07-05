@@ -1,14 +1,27 @@
 
 #include <DPQ.cuh>
 #include <thrust/copy.h>
-#include<thrust/detail/minmax.h>
-#include<chrono>
+#include <thrust/detail/minmax.h>
+#include <chrono>
 using namespace std;
 
 typedef struct queue_element
 {
 	int v, p;
 } queue_element;
+__global__ void count_used(node *tree, int width, int *counts, int N)
+{
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	if (idx < N)
+	{
+		int vline = idx * width;
+		for (int x = 1; x < width; x++)
+		{
+			if (tree[vline + x].c != inf)
+				atomicAdd(counts, 1);
+		}
+	}
+}
 
 __device__ __forceinline__ int get_lb(node *tree, int vline, int x_slash)
 {
@@ -70,7 +83,7 @@ int graph_v_of_v_idealID_DPBF_vertex_group_set_ID_gpu(int vertex, graph_v_of_v_i
 	return ID;
 }
 
-__global__ void Relax(queue_element *Queue_dev, int queue_size, queue_element *new_queue_device, int *new_queue_size, int *sets_IDs, int *sets_IDS_pointer, int *edge, int *edge_cost, int *pointer, int width, node *tree, int inf, int *best, int full, int *lb0)
+__global__ void Relax(queue_element *Queue_dev, int queue_size, queue_element *new_queue_device, int *new_queue_size, int *sets_IDs, int *sets_IDS_pointer, int *edge, int *edge_cost, int *pointer, int width, node *tree, int inf, int *best, int full, int *lb0, int *tree_weight)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < queue_size)
@@ -82,6 +95,7 @@ __global__ void Relax(queue_element *Queue_dev, int queue_size, queue_element *n
 		if (tree[v_line + x_slash].cost != inf)
 		{
 			int new_best = tree[v_line + x_slash].cost + tree[v_line + p].cost;
+
 			if (new_best <= (*best))
 			{
 				atomicMin((int *)best, new_best);
@@ -105,6 +119,11 @@ __global__ void Relax(queue_element *Queue_dev, int queue_size, queue_element *n
 			}
 			atomicMin((int *)best, new_best);
 		}
+
+					if (*best == (*tree_weight))
+			{
+				*tree_weight = -1;
+			}
 		if (tree[v_line + p].cost - 1 > (*best) / 2)
 		{
 			return;
@@ -222,7 +241,7 @@ __global__ void one_label_lb(node *tree, int width, int *lb0, int N, int G, int 
 		}
 	}
 }
-__global__ void count_set(node *tree,int width,int inf, int N,int *counts)
+__global__ void count_set(node *tree, int width, int inf, int N, int *counts)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -231,10 +250,10 @@ __global__ void count_set(node *tree,int width,int inf, int N,int *counts)
 		int vline = idx * width;
 		for (int x = 1; x < width; x++)
 		{
-			if(tree[vline+x].cost!=inf)
+			if (tree[vline + x].cost != inf)
 			{
-			atomicAdd(counts,1);
-			}			
+				atomicAdd(counts, 1);
+			}
 		}
 	}
 }
@@ -251,7 +270,7 @@ __global__ void dis0_init_1(queue_element *dis_queue, queue_element *new_dis_que
 		{
 
 			int v = edge[i];
-			
+
 			int vp = v * width + p;
 			int new_w = tree[u * width + p].c + edge_cost[i];
 			int old = atomicMin(&tree[vp].c, new_w);
@@ -270,9 +289,7 @@ __global__ void dis0_init_1(queue_element *dis_queue, queue_element *new_dis_que
 	}
 }
 
-
-
-void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph,  int &real_cost, non_overlapped_group_sets s, double &rt,int &RAM,records &ret)
+void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vector<int> &cumpulsory_group_vertices, graph_v_of_v_idealID &group_graph, graph_v_of_v_idealID &input_graph, int &real_cost, non_overlapped_group_sets s, double &rt, int &RAM, records &ret, int res_weight)
 {
 	// cudaSetDevice(1);
 
@@ -281,10 +298,11 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	auto pend = std::chrono::high_resolution_clock::now();
 	int width, height, r = 0, process = 0, N = graph.V;
 	int *queue_size, *new_queue_size, *lb0, *dis_queue_size, *new_dis_queue_size, *non_overlapped_group_sets_IDs_gpu, *non_overlapped_group_sets_IDs_pointer_device, *can_find;
-	int *all_pointer, *all_edge, *edge_cost;
+	int *all_pointer, *all_edge, *edge_cost, *tree_weight, *set_num;
 	int *w_d, *w1_d;
 	node *tree;
 	int *best;
+	cudaSetDevice(3);
 	queue_element *queue_device, *new_queue_device, *new_dis_queue, *dis_queue;
 	double time_process = 0;
 	int G = cumpulsory_group_vertices.size();
@@ -292,6 +310,9 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	int group_sets_ID_range = pow(2, G) - 1;
 	width = group_sets_ID_range + 1, height = N;
 	long long unsigned int problem_size = N * pow(2, cumpulsory_group_vertices.size());
+	cudaMallocManaged((void **)&tree_weight, sizeof(int));
+	*tree_weight = res_weight;
+	cudaMallocManaged((void **)&set_num, sizeof(int));
 	cudaMallocManaged((void **)&can_find, sizeof(int));
 	cudaMallocManaged((void **)&dis_queue, N * G * sizeof(queue_element));
 	cudaMallocManaged((void **)&new_dis_queue, N * G * sizeof(queue_element));
@@ -313,7 +334,7 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	int vv[G][G] = {inf};
 	// host_lb = new int[N];
 	int *w = new int[G * G * width], *w1 = new int[G * width];
-	int max_queue_size = 0 ;
+	int max_queue_size = 0;
 	// std::cout << "pitch " << pitch_node << " " << " width " << width << std::endl;
 	auto end = std::chrono::high_resolution_clock::now();
 	double runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9; // s
@@ -326,14 +347,13 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	*queue_size = 0, *dis_queue_size = 0, *new_queue_size = 0, *new_dis_queue_size = 0;
 	begin = std::chrono::high_resolution_clock::now();
 	int vnum = input_graph.size() - group_graph.size();
-	for(int i=0;i<N;i++)
+	for (int i = 0; i < N; i++)
 	{
 		for (size_t j = 1; j < width; j++)
 		{
 			host_tree[i][j].cost = inf;
 			host_tree[i][j].c = inf;
 		}
-		
 	}
 	std::unordered_set<int> contain_group_vertices;
 	set_max_ID(group_graph, cumpulsory_group_vertices, host_tree, contain_group_vertices);
@@ -371,7 +391,7 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	end = std::chrono::high_resolution_clock::now();
 	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9; // s
 	time_process += runningtime;
-	
+
 	begin = std::chrono::high_resolution_clock::now();
 
 	r = 0;
@@ -403,8 +423,6 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		thrust::swap(dis_queue, new_dis_queue);
 	}
 
-	
-
 	cudaMemcpy(host_tree_one_d, tree, width * sizeof(node) * height, cudaMemcpyDeviceToHost);
 	for (size_t i = 0; i < G; i++)
 	{
@@ -433,14 +451,14 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 	}
 	for (size_t i = 0; i < G; i++)
 	{
-		//cout << i << " ";
+		// cout << i << " ";
 		w[i * width * G + i * width + (1 << i)] = 0;
 		for (size_t j = 0; j < G; j++)
 		{
-		//	cout << vv[i][j] << " ";
+			//	cout << vv[i][j] << " ";
 			w[i * width * G + j * width] = vv[i][j];
 		}
-		//cout << endl;
+		// cout << endl;
 	}
 	for (int x = 1; x < width; x++)
 	{
@@ -499,9 +517,9 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		//	return solution_tree;
 	}
 
-	//std ::cout << "test cost time " << runningtime << std ::endl;
-	// std::cout << "queue size init " << *queue_size << std::endl;
-	// std::cout << "queue init " << std::endl;
+	// std ::cout << "test cost time " << runningtime << std ::endl;
+	//  std::cout << "queue size init " << *queue_size << std::endl;
+	//  std::cout << "queue init " << std::endl;
 	/* 	for (size_t i = 0; i < *queue_size; i++)
 		{
 			std::cout << " v " << queue_device[i].v << " p " << queue_device[i].p << "; ";
@@ -509,6 +527,9 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 
 	r = 0;
 	pbegin = std::chrono::high_resolution_clock::now();
+	cout<<"tree_weight "<<*tree_weight<<endl;
+	int *counts,first_set=0;
+	cudaMallocManaged((void **)&counts, sizeof(int));
 	while (*queue_size != 0)
 	{
 		process += *queue_size;
@@ -520,7 +541,7 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		//  }
 		//  cout<<endl;
 		Relax<<<(*queue_size + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(queue_device, *queue_size, new_queue_device, new_queue_size, non_overlapped_group_sets_IDs_gpu,
-																							 non_overlapped_group_sets_IDs_pointer_device, all_edge, edge_cost, all_pointer, width, tree, inf, best, group_sets_ID_range, lb0);
+																							 non_overlapped_group_sets_IDs_pointer_device, all_edge, edge_cost, all_pointer, width, tree, inf, best, group_sets_ID_range, lb0, tree_weight);
 		// cudaMemcpy(host_tree_one_d, tree, width * sizeof(node) * height, cudaMemcpyDeviceToHost);
 		// for (size_t i = 0; i < height; i++)
 		// {
@@ -531,8 +552,22 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		// 	}
 		// 	cout<<endl;
 		// }
+		
+		
+
 		cudaDeviceSynchronize();
-		max_queue_size = max(max_queue_size,*queue_size);
+		if (*tree_weight == -1&&first_set==0)
+		{
+			first_set=1;
+			auto mid_end = std::chrono::high_resolution_clock::now();
+			ret.mid_time = std::chrono::duration_cast<std::chrono::nanoseconds>(mid_end - pbegin).count() / 1e9;
+			count_set<<<(N + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(tree, width, inf, N, counts);
+			cudaDeviceSynchronize();
+			ret.mid_counts = *counts;
+			ret.mid_process_queue_num = process;
+			//cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
+		}
+		max_queue_size = max(max_queue_size, *queue_size);
 		// std ::cout << "merge " << *merge_count <<"grow "<<*new_queue_size-*merge_count << std ::endl;
 		end = std::chrono::high_resolution_clock::now();
 		runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9; // s
@@ -542,18 +577,18 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		// 根据新队列cost和旧队列cost合并新队列和旧队列从运行队列后的元素
 		std::swap(queue_device, new_queue_device);
 	}
-	int *counts;
-	cudaMallocManaged((void **)&counts,sizeof(int));
-	count_set<<<(N + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(tree,width,inf,N,counts);
+	*counts = 0;
+	count_set<<<(N + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(tree, width, inf, N, counts);
 	cudaDeviceSynchronize();
-	RAM = (*counts+max_queue_size+N*width);
-	//cout<<"total process node "<<process<<endl;
+	RAM = (*counts + max_queue_size + N * width);
+	//cout<<"process "<<process<<endl;
+	// cout<<"total process node "<<process<<endl;
 	ret.counts = *counts;
 	ret.process_queue_num = process;
 	pend = std::chrono::high_resolution_clock::now();
 	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(pend - pbegin).count() / 1e9; // s
 	rt = runningtime;
-	
+
 	begin = std::chrono::high_resolution_clock::now();
 	cudaMemcpy(host_tree_one_d, tree, width * sizeof(node) * height, cudaMemcpyDeviceToHost);
 	int min_cost = inf, min_node = -1;
@@ -567,10 +602,11 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 		}
 	}
 	real_cost = min_cost;
-	//std::cout << "gpu cost " << min_cost << " root at " << min_node << std::endl;
+	// std::cout << "gpu cost " << min_cost << " root at " << min_node << std::endl;
 	if (min_node == -1)
-	{real_cost = 0;
-		cout<<"can not find sulition"<<endl;
+	{
+		real_cost = 0;
+		cout << "can not find sulition" << endl;
 		// return solution_tree;
 	}
 

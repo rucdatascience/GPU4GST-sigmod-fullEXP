@@ -25,6 +25,7 @@ Here, we show how to build and run experiments on a Linux server with the Ubuntu
 - CUDA compiler NVIDIA 11.8.89
 - cmake version 3.28.3
 - Boost
+
 We will provide a detailed introduction to the experimental process as follows.
 
 In your appropriate directory, execute the following commands:
@@ -66,7 +67,7 @@ make
 ```
 The above instructions switch to the corresponding directory of the algorithm and compile the code into an executable file.
 ```
-./bin/D-TrimCDP-WB 2 ../../../data/ Musae 3 4 0 299
+./bin/D-TrimCDP-WB 2 ../../../data/ Musae 3 5 0 299
 ```
 This instruction executes the executable file, specifying the query size, the dataset to be used and its location, the upper bound of the diameter constraint, and the start and end indices of the queries to be executed.
 
@@ -88,15 +89,37 @@ In the six subfolders, there are .h, .cu, .cuh, and .cpp files used for conducti
 - "PrunedDP++/include/CPUNONHOP.h" contains codes of PrunedDP++.
 
 
-### GPU
+### TrimCDP
 - "TrimCDP/src/main.cpp" contains codes for conducting experiments for TrimCDP. 
 - "TrimCDP/include/exp_GPU_nonHop.h" contains code for reading the graph, groups, and queries.
 - "TrimCDP/src/DPQ.cu" contains codes of TrimCDP.
 
 
-### GPU+
+### TrimCDP-WB
 - "TrimCDP-WB/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB. 
 - "TrimCDP-WB/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB.
 - "TrimCDP-WB/include/mapper.cuh" contains codes for performing specific operations on vertices, such as grow and merge operations.
 - "TrimCDP-WB/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+## Additional experiment code
+We have attached the code for the comparative experiment, which analyzes the impact of kernel fusion and shared memory on the experiment. They are also located in the /code folder:
+
+
+- TrimCDP-WB-KF-SM. Kernel fusion and shared memory are used on the basis of TrimCDP-WB.
+- TrimCDP-WB-NoKF-SM. Kernel fusion is not used, but shared memory is used on the basis of TrimCDP-WB.
+- TrimCDP-WB-NoKF-NoSM. Neither kernel fusion nor shared memory is used on the basis of TrimCDP-WB.
+- D-TrimCDP-WB-KF-SM. Kernel fusion and shared memory are used on the basis of D-TrimCDP-WB.
+- D-TrimCDP-WB-NoKF-SM. Kernel fusion is not used, but shared memory is used on the basis of D-TrimCDP-WB.
+- D-TrimCDP-WB-NoKF-NoSM. Neither kernel fusion nor shared memory is used on the basis of D-TrimCDP-WB.
+- MT-PrunedDP++. The multi-threaded version of PrunedDP++ without using a priority queue.
+- MT-D-PrunedDP++. The multi-threaded version of D-PrunedDP++ without using a priority queue.
+
+### Run additional experiments
+
+The code structure for the additional experiments is similar to their base versions. The sh file for running the additional experiments is located in sh/additional_exp folder. For example, when the current working directory is GPU4GST, the following instruction can be used to execute the TrimCDP-WB-NoKF-NoSM (TrimCDP-WB without kernel fusion and shared memory) experiment on all datasets:
+
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-NoKF-NoSM.sh
+ ```
+
 
