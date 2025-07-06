@@ -108,7 +108,7 @@ void exp_CPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"MT_CPU/exp_CPU_Hop_" + data_name + "_T" + to_string(T) + "_"+"D"+to_string(D)+"_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"MT-CPU/exp_CPU_Hop_" + data_name + "_T" + to_string(T) + "_"+"D"+to_string(D)+"_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,CPU_Hop_time,CPU_Hop_cost,CPU_Hop_memory,counts,process_num" << endl;
 	int N = V,G = inquire[0].size();

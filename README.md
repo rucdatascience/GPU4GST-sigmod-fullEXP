@@ -38,7 +38,7 @@ Switch the working directory to GPU4GST.
 ```
 cd GPU4GST
 ```
-Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory GPU4GST.
+Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). In code settings, data should be stored in the "data" folder of the working directory GPU4GST.
 
 
 
@@ -111,8 +111,8 @@ We have attached the code for the comparative experiment, which analyzes the imp
 - D-TrimCDP-WB-KF-SM. Kernel fusion and shared memory are used on the basis of D-TrimCDP-WB.
 - D-TrimCDP-WB-NoKF-SM. Kernel fusion is not used, but shared memory is used on the basis of D-TrimCDP-WB.
 - D-TrimCDP-WB-NoKF-NoSM. Neither kernel fusion nor shared memory is used on the basis of D-TrimCDP-WB.
-- MT-PrunedDP++. The multi-threaded version of PrunedDP++ without using a priority queue.
-- MT-D-PrunedDP++. The multi-threaded version of D-PrunedDP++ without using a priority queue.
+- MT-PrunedDP++. The multi-thread version of PrunedDP++ without using a priority queue.
+- MT-D-PrunedDP++. The multi-thread version of D-PrunedDP++ without using a priority queue.
 
 ### Run additional experiments
 
