@@ -102,9 +102,9 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 			auto begin = std::chrono::high_resolution_clock::now();
 			double runningtime;
 			records ret;
-			cout<<"tree_weight "<<tree_weight[i]<<endl;
+			//cout<<"tree_weight "<<tree_weight[i]<<endl;
 			graph_hash_of_mixed_weighted solu = DP_gpu(csr_graph, generated_group_vertices, v_generated_group_graph, v_instance_graph, D, &runningtime, cost,RAM,ret,tree_weight[i]);
-			cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
+			//cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
 			auto end = std::chrono::high_resolution_clock::now();
 			//	runningtime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() / 1e9;
 			// cost = graph_hash_of_mixed_weighted_sum_of_ec(solu);

@@ -527,7 +527,7 @@ void DP_GPU(node **host_tree, node *host_tree_one_d, CSR_graph &graph, std::vect
 
 	r = 0;
 	pbegin = std::chrono::high_resolution_clock::now();
-	cout<<"tree_weight "<<*tree_weight<<endl;
+	//cout<<"tree_weight "<<*tree_weight<<endl;
 	int *counts,first_set=0;
 	cudaMallocManaged((void **)&counts, sizeof(int));
 	while (*queue_size != 0)

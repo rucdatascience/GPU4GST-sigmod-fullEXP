@@ -234,7 +234,7 @@ graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpuls
 			cudaDeviceSynchronize();
 			ret.mid_counts = *counts;
 			ret.mid_process_queue_num = tot_process;
-			cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
+			//cout<<"mid_counts "<<ret.mid_counts<<" mid_process_queue_num "<<ret.mid_process_queue_num<<endl;
 		}
         swap(queue, queue2);
         swap(queue_size, queue_size2);
@@ -274,7 +274,7 @@ graph_hash_of_mixed_weighted DP_gpu(CSR_graph &graph, std::vector<uint> &cumpuls
     RAM = (*counts);
     
 	RAM += max_queue_size+N*width*D;
-    cout<<*counts<<" "<<max_queue_size<<" "<<N*width*D<<" "<<RAM<<endl;
+    //cout<<*counts<<" "<<max_queue_size<<" "<<N*width*D<<" "<<RAM<<endl;
     cudaFree(host_tree);
     cudaFree(queue);
     cudaFree(queue2);

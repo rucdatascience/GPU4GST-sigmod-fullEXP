@@ -110,7 +110,7 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 		}
 		std::cout << endl;
 
-		std::cout << "get inquire complete" << std::endl;
+		//std::cout << "get inquire complete" << std::endl;
 		if (1)
 		{
 

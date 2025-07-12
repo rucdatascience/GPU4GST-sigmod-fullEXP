@@ -215,7 +215,7 @@ int main(int args, char **argv)
 
 		double time = wtime();
 		// mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier, 0);
-		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
+		balanced_push_atomic(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		//balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);

@@ -38,7 +38,7 @@ Switch the working directory to GPU4GST.
 ```
 cd GPU4GST
 ```
-Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). In code settings, data should be stored in the "data" folder of the working directory GPU4GST.
+Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory GPU4GST.
 
 
 
@@ -54,6 +54,18 @@ The other six sh files correspond to complete experiments of an algorithm on eig
 
  ```
 sh sh/exp_TrimCDP-WB.sh
+ ```
+
+For optimization analysis algorithms, the sh files are located in the "sh/additional_exp" folder. For example, to run experiments for TrimCDP-WB without kernel fusion and shared memory:
+
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing.sh
+ ```
+
+For multi-core CPU algorithms, the sh files are also located in the "sh/additional_exp" folder. For example, to run experiments for TrimCDP multi-core CPU version:
+
+ ```
+sh sh/additional_exp/exp_TrimCDP-multi-core-CPU.sh
  ```
 
 
@@ -73,53 +85,201 @@ This instruction executes the executable file, specifying the query size, the da
 
 
 ## GST_code
-All codes are located in the 'code' folder. There are six subfolders, each corresponding to codes of one of six experiments in the paper.
-- PrunedDP++. This is the PrunedDP++ version code of GST without diameter constraints.
-- TrimCDP. This is the TrimCDP version code without diameter constraint for GST.
-- TrimCDP-WB. This is the TrimCDP-WB version code without diameter constraint for GST.
-- D-PrunedDP++. This is the PrunedDP++ version code with diameter constraints for GST.
-- D-TrimCDP. This is the TrimCDP version code with diameter constraints for GST.
-- D-TrimCDP-WB. This is the TrimCDP-WB version code with diameter constraints for GST.
+All codes are located in the 'code' folder. There are sixteen subfolders, each corresponding to codes of one of sixteen experiments in the paper.
 
-In the six subfolders, there are .h, .cu, .cuh, and .cpp files used for conducting experiments in the paper. The .h and .cuh files are in the "include" directory, while the .cpp files are in the "src" directory. Some examples are as follows.
+### Basic Algorithms (without diameter constraints):
+- **PrunedDP++**. This is the PrunedDP++ version code of GST without diameter constraints.
+- **TrimCDP**. This is the TrimCDP version code without diameter constraint for GST.
+- **TrimCDP-WB**. This is the TrimCDP-WB version code without diameter constraint for GST.
+
+### Basic Algorithms (with diameter constraints):
+- **D-PrunedDP++**. This is the PrunedDP++ version code with diameter constraints for GST.
+- **D-TrimCDP**. This is the TrimCDP version code with diameter constraints for GST.
+- **D-TrimCDP-WB**. This is the TrimCDP-WB version code with diameter constraints for GST.
+
+### Optimization Analysis Algorithms (without diameter constraints):
+- **TrimCDP-WB-kernel_fusion-shared_memory-coalescing**. This is the TrimCDP-WB version with kernel fusion, shared memory, and global memory coalescing optimizations.
+- **TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing**. This is the TrimCDP-WB version without kernel fusion but with shared memory and global memory coalescing optimizations.
+- **TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing**. This is the TrimCDP-WB version without kernel fusion and shared memory but with global memory coalescing optimization.
+- **TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing**. This is the TrimCDP-WB version with kernel fusion but without shared memory and global memory coalescing optimizations.
+
+### Optimization Analysis Algorithms (with diameter constraints):
+- **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing**. This is the D-TrimCDP-WB version with kernel fusion, shared memory, and global memory coalescing optimizations.
+- **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing**. This is the D-TrimCDP-WB version without kernel fusion but with shared memory and global memory coalescing optimizations.
+- **D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing**. This is the D-TrimCDP-WB version without kernel fusion and shared memory but with global memory coalescing optimization.
+- **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing**. This is the D-TrimCDP-WB version with kernel fusion but without shared memory and global memory coalescing optimizations.
+
+### Multi-core CPU Algorithms:
+- **TrimCDP-multi-core-CPU**. This is the multi-threaded version of TrimCDP without using a priority queue.
+- **D-TrimCDP-multi-core-CPU**. This is the multi-threaded version of D-TrimCDP without using a priority queue.
+
+In the sixteen subfolders, there are .h, .cu, .cuh, and .cpp files used for conducting experiments in the paper. The .h and .cuh files are in the "include" directory, while the .cpp files are in the "src" directory. The explanations for them are as follows.
 
 
-### CPU:
+### PrunedDP++:
 - "PrunedDP++/src/main.cpp" contains codes for conducting experiments for PrunedDP++. 
 - "PrunedDP++/include/CPUNONHOP.h" contains codes of PrunedDP++.
 
+The command to run this experiment is:
+ ```
+sh sh/exp_prunedDP++.sh
+ ```
 
-### TrimCDP
+### TrimCDP:
 - "TrimCDP/src/main.cpp" contains codes for conducting experiments for TrimCDP. 
 - "TrimCDP/include/exp_GPU_nonHop.h" contains code for reading the graph, groups, and queries.
 - "TrimCDP/src/DPQ.cu" contains codes of TrimCDP.
 
+The command to run this experiment is:
+ ```
+sh sh/exp_TrimCDP.sh
+ ```
 
-### TrimCDP-WB
+### TrimCDP-WB:
 - "TrimCDP-WB/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB. 
 - "TrimCDP-WB/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB.
 - "TrimCDP-WB/include/mapper.cuh" contains codes for performing specific operations on vertices, such as grow and merge operations.
 - "TrimCDP-WB/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
 
-## Additional experiment code
-We have attached the code for the comparative experiment, which analyzes the impact of kernel fusion and shared memory on the experiment. They are also located in the /code folder:
-
-
-- TrimCDP-WB-KF-SM. Kernel fusion and shared memory are used on the basis of TrimCDP-WB.
-- TrimCDP-WB-NoKF-SM. Kernel fusion is not used, but shared memory is used on the basis of TrimCDP-WB.
-- TrimCDP-WB-NoKF-NoSM. Neither kernel fusion nor shared memory is used on the basis of TrimCDP-WB.
-- D-TrimCDP-WB-KF-SM. Kernel fusion and shared memory are used on the basis of D-TrimCDP-WB.
-- D-TrimCDP-WB-NoKF-SM. Kernel fusion is not used, but shared memory is used on the basis of D-TrimCDP-WB.
-- D-TrimCDP-WB-NoKF-NoSM. Neither kernel fusion nor shared memory is used on the basis of D-TrimCDP-WB.
-- MT-PrunedDP++. The multi-thread version of PrunedDP++ without using a priority queue.
-- MT-D-PrunedDP++. The multi-thread version of D-PrunedDP++ without using a priority queue.
-
-### Run additional experiments
-
-The code structure for the additional experiments is similar to their base versions. The sh file for running the additional experiments is located in sh/additional_exp folder. For example, when the current working directory is GPU4GST, the following instruction can be used to execute the TrimCDP-WB-NoKF-NoSM (TrimCDP-WB without kernel fusion and shared memory) experiment on all datasets:
-
+The command to run this experiment is:
  ```
-sh sh/additional_exp/exp_TrimCDP-WB-NoKF-NoSM.sh
+sh sh/exp_TrimCDP-WB.sh
+ ```
+
+### D-PrunedDP++:
+- "D-PrunedDP++/src/main.cpp" contains codes for conducting experiments for D-PrunedDP++. 
+- "D-PrunedDP++/include/CPUHOP.h" contains codes of D-PrunedDP++.
+
+The command to run this experiment is:
+ ```
+sh sh/exp_D-prunedDP++.sh
+ ```
+
+### D-TrimCDP:
+- "D-TrimCDP/src/main.cpp" contains codes for conducting experiments for D-TrimCDP. 
+- "D-TrimCDP/include/exp_GPU_Hop.h" contains code for reading the graph, groups, and queries.
+- "D-TrimCDP/src/DPQ.cu" contains codes of D-TrimCDP.
+
+The command to run this experiment is:
+ ```
+sh sh/exp_D-TrimCDP.sh
+ ```
+
+### D-TrimCDP-WB:
+- "D-TrimCDP-WB/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB. 
+- "D-TrimCDP-WB/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB.
+- "D-TrimCDP-WB/include/mapper.cuh" contains codes for performing specific operations on vertices, such as grow and merge operations.
+- "D-TrimCDP-WB/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/exp_D-TrimCDP-WB.sh
+ ```
+
+### TrimCDP-WB-kernel_fusion-shared_memory-coalescing:
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion, shared memory, and global memory coalescing optimizations.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with optimizations.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with optimizations.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-kernel_fusion-shared_memory-coalescing.sh
+ ```
+
+### TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing:
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without kernel fusion but with shared memory and global memory coalescing optimizations.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with partial optimizations.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with partial optimizations.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing.sh
+ ```
+
+### TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing:
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without kernel fusion and shared memory but with global memory coalescing optimization.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with minimal optimizations.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with minimal optimizations.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing.sh
+ ```
+
+### TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing:
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion but without shared memory and global memory coalescing optimizations.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with kernel fusion only.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion only.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing.sh
+ ```
+
+### D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing:
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion, shared memory, and global memory coalescing optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing.sh
+ ```
+
+### D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing:
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without kernel fusion but with shared memory and global memory coalescing optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with partial optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with partial optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing.sh
+ ```
+
+### D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing:
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without kernel fusion and shared memory but with global memory coalescing optimization.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with minimal optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with minimal optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing.sh
+ ```
+
+### D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing:
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion but without shared memory and global memory coalescing optimizations.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with kernel fusion only.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion only.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing.sh
+ ```
+
+### TrimCDP-multi-core-CPU:
+- "TrimCDP-multi-core-CPU/src/main.cpp" contains codes for conducting experiments for TrimCDP multi-core CPU version.
+- "TrimCDP-multi-core-CPU/include/CPUNONHOP.h" contains codes of TrimCDP multi-core CPU implementation.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_TrimCDP-multi-core-CPU.sh
+ ```
+
+### D-TrimCDP-multi-core-CPU:
+- "D-TrimCDP-multi-core-CPU/src/main.cpp" contains codes for conducting experiments for D-TrimCDP multi-core CPU version.
+- "D-TrimCDP-multi-core-CPU/include/CPUHOP.h" contains codes of D-TrimCDP multi-core CPU implementation.
+
+The command to run this experiment is:
+ ```
+sh sh/additional_exp/exp_D-TrimCDP-multi-core-CPU.sh
  ```
 
 

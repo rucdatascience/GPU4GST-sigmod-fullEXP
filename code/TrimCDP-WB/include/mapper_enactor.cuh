@@ -755,7 +755,6 @@ int balanced_push_without_fusion(
 
 	// printf("balanced push-- block=%d, grid=%d\n", blk_size, grd_size);
 	assert(blk_size * grd_size <= BLKS_NUM * THDS_NUM);
-	cout << blk_size << " " << grd_size << endl;
 	// push_pull_opt_kernel
 	int work_size = 0;
 	int rounds = 0;

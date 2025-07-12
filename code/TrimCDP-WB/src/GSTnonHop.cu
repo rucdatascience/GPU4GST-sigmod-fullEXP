@@ -418,7 +418,7 @@ int main(int args, char **argv)
 		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);
-		std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " record best " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5]<<"total"<<level_h[6] << "\n";
+		//std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " record best " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5]<<"total"<<level_h[6] << "\n";
 		cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// for (size_t i = 0; i < V; i++)
 		// {
@@ -489,7 +489,7 @@ int main(int args, char **argv)
 		count_used<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(mdata.vert_status, width, set_num, V);
 		cudaDeviceSynchronize();
 		int mem_MB = (level_h[5]+V*width+*set_num);
-		cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
+		//cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
 		outputFile << ii << "," << task << "," << ftime << "," << minc << "," << mem_MB<<","<<*set_num<<","<<level_h[6] << endl;
 		sum_time += ftime;
 		// std::cout << "Total iteration: " << level_h[0] << "\n";
