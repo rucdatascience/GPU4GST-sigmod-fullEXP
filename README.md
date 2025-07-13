@@ -18,70 +18,91 @@ The dataset of the paper is stored on [OneDrive](https://1drv.ms/f/c/683d9dd9f26
 
 8. "Twitch7.csv". Each line of this file represents a query of size 7. For example, "3137 393 742 25 2125 2122 727" indicates that the return tree of this query must contain group 3137, 393, 742, 25, 2125, 2122, 727.
 
+Regarding how the program reads binary files, you can refer to the code located at "code/TrimCDP-WB/include/graph.hpp"
    
 ## Running code example
 Here, we show how to build and run experiments on a Linux server with the Ubuntu 20.04 system, an Intel(R) Xeon(R) Platinum 8360Y CPU @ 2.40GHz, and 1 NVIDIA GeForce RTX A6000 GPU. The environment is as follows:
 - gcc version 9.3.0 (GCC)
 - CUDA compiler NVIDIA 11.8.89
-- cmake version 3.28.3
+- CMake version 3.28.3
 - Boost
+
+Please note:
+- The CMake version should be 3.27 or above.
+- In the above environment, if you need to run GPU code, it is recommended to install the corresponding CUDA version to avoid possible compilation errors caused by version incompatibility.
+- The above environment is introduced by CMake after installation.  At the same time, the instructions in the CMake file will download some external libraries, so please run the following mentioned sh command on a machine with network connection.
 
 We will provide a detailed introduction to the experimental process as follows.
 
 In your appropriate directory, execute the following commands:
 
-Download the code:
+ **Download the code**:
 ```
 git clone https://anonymous.4open.science/r/GPU4GST/
 ```
-Switch the working directory to GPU4GST.
+ **Switch the working directory to GPU4GST.**
 ```
 cd GPU4GST
 ```
-Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). Assume that the dataset is located in the "data" folder of the working directory GPU4GST.
+ **Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). **
+
+Download the dataset from OneDrive to the "data" folder. **Please note that "data" is the default path for storing the dataset. We have already provided the Musae dataset in the "data" folder in advance. Please store the other datasets in a similar manner.  If the storage location is incorrect, the program will not be able to read the data.**
 
 
 
-After preparing the environment according to the above suggestions, we can use the sh files in the "sh" folder to compile and run the code.
-Among them, example.sh conducts experiments on six algorithms using the Twitch dataset, with each algorithm executing 50 queries of size 3. The running instruction is:
+After preparing the environment and dataset according to the above suggestions, we can use the sh files in the "sh" folder to compile and run the code.
+Among them, example.sh conducts experiments on six base algorithms introduced in "GST_Code" section of this readme using the Twitch dataset, with each algorithm executing 50 queries of size 3. **The running instruction is**:
  ```
 sh sh/example.sh
  ```
-The experiment results will be automatically saved as CSV files in the "data/result" folder.
+**The experiment results will be automatically saved as CSV files in the "data/result" folder. The CSV file will store data such as the queried group, cost of the solution, running time, and number of processing vertices.**
 
 
-The other six sh files correspond to complete experiments of an algorithm on eight datasets, with 300 queries of sizes 3, 5, and 7 executed on each dataset. For example, to run experiments for TrimCDP-WB, using the following instruction:
+The other six sh files correspond to complete experiments of an algorithm on eight datasets, with 300 queries of sizes 3, 5, and 7 executed on each dataset. For example, to run experiments for TrimCDP-WB, **using the following instruction**:
 
  ```
 sh sh/exp_TrimCDP-WB.sh
  ```
 
-For optimization analysis algorithms, the sh files are located in the "sh/additional_exp" folder. For example, to run experiments for TrimCDP-WB without kernel fusion and shared memory:
+For optimization analysis algorithms, the sh files are located in the "sh/additional_exp" folder. **For example, to run experiments for TrimCDP-WB without kernel fusion and shared memory:**
 
  ```
 sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing.sh
  ```
 
-For multi-core CPU algorithms, the sh files are also located in the "sh/additional_exp" folder. For example, to run experiments for TrimCDP multi-core CPU version:
+For multi-core CPU algorithms, the sh files are also located in the "sh/additional_exp" folder. **For example, to run experiments for TrimCDP multi-core CPU version:**
 
  ```
 sh sh/additional_exp/exp_TrimCDP-multi-core-CPU.sh
  ```
 
 
-Taking exp_D-TrimCDP-WB.sh as an example:
-```
-cd code/D-TrimCDP-WB/build
-mkdir build
-cd build
-cmake ..
-make
-```
-The above instructions switch to the corresponding directory of the algorithm and compile the code into an executable file.
+Taking exp_D-TrimCDP-WB.sh as an example, The explanation for the sh file is as follows:
+
+| Command | Description |
+|---------|-------------|
+| `cd code/D-TrimCDP-WB/build` | Navigate to the algorithm directory |
+| `mkdir build` | Create build directory |
+| `cd build` | Enter build directory |
+| `cmake ..` | Configure the build with CMake |
+| `make` | Compile the code into executable file |
 ```
 ./bin/D-TrimCDP-WB 2 ../../../data/ Musae 3 5 0 299
 ```
-This instruction executes the executable file, specifying the query size, the dataset to be used and its location, the upper bound of the diameter constraint, and the start and end indices of the queries to be executed.
+The explanation for this line is as follows:
+
+| Parameter | Description |
+|-----------|-------------|
+| `./bin/D-TrimCDP-WB` | Execute binary files |
+| `2` | Number of GPU threads to use for computation |
+| `../../../data/` | Directory path where the dataset files are stored |
+| `Musae` | Name of the dataset to be used for the experiment |
+| `3` | Size of each query (number of groups to connect) |
+| `5` | Upper bound for the diameter constraint of the solution tree |
+| `0` | Starting index of queries to execute  |
+| `299` | Ending index of queries to execute  |
+
+This command will execute 300 queries (from index 0 to 299) of size 3 on the Musae dataset using the D-TrimCDP-WB algorithm with a diameter constraint of 5.
 
 
 ## GST_code
@@ -98,16 +119,22 @@ All codes are located in the 'code' folder. There are sixteen subfolders, each c
 - **D-TrimCDP-WB**. This is the TrimCDP-WB version code with diameter constraints for GST.
 
 ### Optimization Analysis Algorithms (without diameter constraints):
-- **TrimCDP-WB-kernel_fusion-shared_memory-coalescing**. This is the TrimCDP-WB version with kernel fusion, shared memory, and global memory coalescing optimizations.
-- **TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing**. This is the TrimCDP-WB version without kernel fusion but with shared memory and global memory coalescing optimizations.
-- **TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing**. This is the TrimCDP-WB version without kernel fusion and shared memory but with global memory coalescing optimization.
-- **TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing**. This is the TrimCDP-WB version with kernel fusion but without shared memory and global memory coalescing optimizations.
+
+| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Description |
+|-------------------|---------------|---------------|-------------------------|-------------|
+| **TrimCDP-WB-kernel_fusion-shared_memory-coalescing** | ✓ | ✓ | ✓ | version with kernel fusion, shared memory, and global memory coalescing optimizations |
+| **TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing** | ✗ | ✓ | ✓ | Version without kernel fusion but with shared memory and coalescing |
+| **TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing** | ✗ | ✗ | ✓ | Version with only global memory coalescing optimization |
+| **TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing** | ✓ | ✗ | ✗ | Version with only kernel fusion optimization |
 
 ### Optimization Analysis Algorithms (with diameter constraints):
-- **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing**. This is the D-TrimCDP-WB version with kernel fusion, shared memory, and global memory coalescing optimizations.
-- **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing**. This is the D-TrimCDP-WB version without kernel fusion but with shared memory and global memory coalescing optimizations.
-- **D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing**. This is the D-TrimCDP-WB version without kernel fusion and shared memory but with global memory coalescing optimization.
-- **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing**. This is the D-TrimCDP-WB version with kernel fusion but without shared memory and global memory coalescing optimizations.
+
+| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Description |
+|-------------------|---------------|---------------|-------------------------|-------------|
+| **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing** | ✓ | ✓ | ✓ | version with kernel fusion, shared memory, and global memory coalescing optimizations. |
+| **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing** | ✗ | ✓ | ✓ | Version without kernel fusion but with shared memory and coalescing |
+| **D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing** | ✗ | ✗ | ✓ | Version with only global memory coalescing optimization |
+| **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing** | ✓ | ✗ | ✗ | Version with only kernel fusion optimization |
 
 ### Multi-core CPU Algorithms:
 - **TrimCDP-multi-core-CPU**. This is the multi-threaded version of TrimCDP without using a priority queue.

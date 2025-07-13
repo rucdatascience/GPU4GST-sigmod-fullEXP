@@ -39,4 +39,4 @@ make
 ./bin/TrimCDP-WB 2 ../../../data/ LiveJournal  5 0 299
 ./bin/TrimCDP-WB 2 ../../../data/ LiveJournal 7 0 299
 
-rm bin/TrimCDP-WB
+
