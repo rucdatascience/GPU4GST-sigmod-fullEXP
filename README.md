@@ -44,7 +44,7 @@ git clone https://anonymous.4open.science/r/GPU4GST/
 ```
 cd GPU4GST
 ```
- **Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S). **
+ **Download the dataset from [OneDrive](https://1drv.ms/f/c/683d9dd9f262486b/Ek6Fl_brQzhDnI2cmhGIHxMBQ-L1ApeSqxwZKE4NBsDXSQ?e=3RBc8S).**
 
 Download the dataset from OneDrive to the "data" folder. **Please note that "data" is the default path for storing the dataset. We have already provided the Musae dataset in the "data" folder in advance. Please store the other datasets in a similar manner.  If the storage location is incorrect, the program will not be able to read the data.**
 
