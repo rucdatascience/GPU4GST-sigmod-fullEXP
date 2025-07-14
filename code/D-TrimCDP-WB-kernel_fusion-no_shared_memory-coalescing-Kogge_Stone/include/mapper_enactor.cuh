@@ -104,11 +104,7 @@ balanced_push_kernel(
 									 mdata.future_work);
 
 		global_barrier.sync_grid_opt();
-		if (mdata.future_work[0] > ggraph.edge_count * SWITCH_TO && 0)
-		{
 
-			break;
-		}
 	}
 
 	if (!TID)

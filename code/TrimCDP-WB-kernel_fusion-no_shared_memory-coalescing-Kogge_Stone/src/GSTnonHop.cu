@@ -46,7 +46,7 @@ __inline__ __device__ bool vertex_selector_best_push(vertex_t vert_id,
 													 feature_t *one_label,
 													 volatile feature_t *best,
 													 feature_t *lb_record,
-													 feature_t *in_queue,
+													 feature_t *merge_or_grow,
 													 feature_t *temp_store)
 {
 	if (vert_status[vert_id] != vert_status_prev[vert_id] && vert_status[vert_id] - 1 <= 0.5 * (*best))
@@ -173,8 +173,7 @@ int main(int args, char **argv)
     for (int i = 0; i < 4; i++) {
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, i);
-    std::cout << "Device Number: " << i << std::endl;
-    std::cout << "  Device name:                " << prop.name << std::endl;
+
 }
 	const char *file_beg_pos = file_beg.c_str();
 	const char *file_adj_list = file_adj.c_str();
@@ -237,7 +236,7 @@ int main(int args, char **argv)
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"KF-NoSM/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"GPU7/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU2_nonHop_time,GPU2_nonHop_cost,GPU2_nonHop_memory,counts,process_num" << endl;
 	Barrier global_barrier(BLKS_NUM);
@@ -304,7 +303,7 @@ int main(int args, char **argv)
 				}
 			}
 		}
-		cudaMemcpy(mdata.in_queue, inqueue, problem_size * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(mdata.merge_or_grow, inqueue, problem_size * sizeof(int), cudaMemcpyHostToDevice);
 		// for (size_t i = 0; i < *dis_queue_size; i++)
 		// {
 		// 	cout << " v " << dis_queue[i] / width << " p " << dis_queue[i] % width << "  ";
@@ -449,7 +448,7 @@ int main(int args, char **argv)
 		// balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 
 	
-		// cudaMemcpy(inqueue, mdata.in_queue, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
+		// cudaMemcpy(inqueue, mdata.merge_or_grow, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 
 		// cudaMemcpy(work_list, mdata.new_worklist_sml, problem_size * sizeof(int), cudaMemcpyDeviceToHost);

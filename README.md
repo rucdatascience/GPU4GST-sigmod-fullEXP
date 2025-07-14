@@ -18,6 +18,21 @@ The dataset of the paper is stored on [OneDrive](https://1drv.ms/f/c/683d9dd9f26
 
 8. "Twitch7.csv". Each line of this file represents a query of size 7. For example, "3137 393 742 25 2125 2122 727" indicates that the return tree of this query must contain group 3137, 393, 742, 25, 2125, 2122, 727.
 
+Take the generation of the binary file for the Twitch dataset as an example. If you need to generate a corresponding binary file for a new dataset, use the following command:
+
+```
+cd data
+g++ tuple_text_to_bin.cpp -o tuple_text_to_bin
+./tuple_text_to_bin Twitch 1 1
+```
+The explanation of the last line of instructions is as follows:
+| Parameter | Description |
+|-----------|-------------|
+| `./tuple_text_to_bin` | Execute binary files |
+| `Twitch.in` | The filename of the dataset to be converted |
+| `1` | 0 indicates that the graph is a directed graph, while 1 indicates that the graph is an undirected graph. |
+| `1` | Indicates to ignore the first line. If you need to ignore more lines, you can modify this parameter. |
+
 Regarding how the program reads binary files, you can refer to the code located at "code/TrimCDP-WB/include/graph.hpp"
    
 ## Running code example
@@ -106,7 +121,7 @@ This command will execute 300 queries (from index 0 to 299) of size 3 on the Mus
 
 
 ## GST_code
-All codes are located in the 'code' folder. There are sixteen subfolders, each corresponding to codes of one of sixteen experiments in the paper.
+All codes are located in the 'code' folder. There are 18 subfolders, each corresponding to codes of one of 18 experiments in the paper.
 
 ### Basic Algorithms (without diameter constraints):
 - **PrunedDP++**. This is the PrunedDP++ version code of GST without diameter constraints.
@@ -120,27 +135,29 @@ All codes are located in the 'code' folder. There are sixteen subfolders, each c
 
 ### Optimization Analysis Algorithms (without diameter constraints):
 
-| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Description |
-|-------------------|---------------|---------------|-------------------------|-------------|
-| **TrimCDP-WB-kernel_fusion-shared_memory-coalescing** | ✓ | ✓ | ✓ | version with kernel fusion, shared memory, and global memory coalescing optimizations |
-| **TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing** | ✗ | ✓ | ✓ | Version without kernel fusion but with shared memory and coalescing |
-| **TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing** | ✗ | ✗ | ✓ | Version with only global memory coalescing optimization |
-| **TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing** | ✓ | ✗ | ✗ | Version with only kernel fusion optimization |
+| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Kogge-Stone Prefix Scan | Description |
+|-------------------|---------------|---------------|-------------------------|------------------------|-------------|
+| **TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone** | ✓ | ✓ | ✓ | ✓ | Version with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan |
+| **TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone** | ✗ | ✓ | ✓ | ✓ | Version without kernel fusion but with shared memory, coalescing, and Kogge-Stone prefix scan |
+| **TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone** | ✓ | ✗ | ✓ | ✓ | Version with kernel fusion, global memory coalescing, and Kogge-Stone prefix scan |
+| **TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone** | ✓ | ✗ | ✗ | ✗ | Version with only kernel fusion optimization |
+| **TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone** | ✗ | ✗ | ✓ | ✗ | Version with only global memory coalescing optimization |
 
 ### Optimization Analysis Algorithms (with diameter constraints):
 
-| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Description |
-|-------------------|---------------|---------------|-------------------------|-------------|
-| **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing** | ✓ | ✓ | ✓ | version with kernel fusion, shared memory, and global memory coalescing optimizations. |
-| **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing** | ✗ | ✓ | ✓ | Version without kernel fusion but with shared memory and coalescing |
-| **D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing** | ✗ | ✗ | ✓ | Version with only global memory coalescing optimization |
-| **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing** | ✓ | ✗ | ✗ | Version with only kernel fusion optimization |
+| Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Kogge-Stone Prefix Scan | Description |
+|-------------------|---------------|---------------|-------------------------|------------------------|-------------|
+| **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone** | ✓ | ✓ | ✓ | ✓ | Version with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan |
+| **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone** | ✗ | ✓ | ✓ | ✓ | Version without kernel fusion but with shared memory, coalescing, and Kogge-Stone prefix scan |
+| **D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone** | ✓ | ✗ | ✓ | ✓ | Version with kernel fusion, global memory coalescing, and Kogge-Stone prefix scan |
+| **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone** | ✓ | ✗ | ✗ | ✗ | Version with only kernel fusion optimization |
+| **D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone** | ✗ | ✗ | ✓ | ✗ | Version with only global memory coalescing optimization |
 
 ### Multi-core CPU Algorithms:
 - **TrimCDP-multi-core-CPU**. This is the multi-threaded version of TrimCDP without using a priority queue.
 - **D-TrimCDP-multi-core-CPU**. This is the multi-threaded version of D-TrimCDP without using a priority queue.
 
-In the sixteen subfolders, there are .h, .cu, .cuh, and .cpp files used for conducting experiments in the paper. The .h and .cuh files are in the "include" directory, while the .cpp files are in the "src" directory. The explanations for them are as follows.
+In the 18 subfolders, there are .h, .cu, .cuh, and .cpp files used for conducting experiments in the paper. The .h and .cuh files are in the "include" directory, while the .cpp files are in the "src" directory. The explanations for them are as follows.
 
 
 ### PrunedDP++:
@@ -307,6 +324,116 @@ sh sh/additional_exp/exp_TrimCDP-multi-core-CPU.sh
 The command to run this experiment is:
  ```
 sh sh/additional_exp/exp_D-TrimCDP-multi-core-CPU.sh
+ ```
+
+### TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone:
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with all optimizations including Kogge-Stone.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with all optimizations.
+- "TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+ ```
+
+### TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone:
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without kernel fusion but with shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with partial optimizations including Kogge-Stone.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with partial optimizations.
+- "TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+ ```
+
+### TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone:
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with kernel fusion and Kogge-Stone optimizations.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion and Kogge-Stone.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+ ```
+
+### TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone:
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion but without shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with kernel fusion only.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion only.
+- "TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+ ```
+
+### TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone:
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without kernel fusion and shared memory but with global memory coalescing optimization.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB with minimal optimizations.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with minimal optimizations.
+- "TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh code/TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+ ```
+
+### D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone:
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with all optimizations including Kogge-Stone.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with all optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/sh/run_exp_GPU2_Hop.sh
+ ```
+
+### D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone:
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without kernel fusion but with shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with partial optimizations including Kogge-Stone.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with partial optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+ ```
+
+### D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone:
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with kernel fusion and Kogge-Stone optimizations.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion and Kogge-Stone.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+
+The command to run this experiment is:
+ ```
+sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+ ```
+
+### D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone:
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion but without shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with kernel fusion only.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with kernel fusion only.
+- "D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+ ```
+
+### D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone:
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without kernel fusion and shared memory but with global memory coalescing optimization.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with minimal optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with minimal optimizations.
+- "D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+ ```
+sh code/D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/sh/run_exp_GPU2_Hop.sh
  ```
 
 

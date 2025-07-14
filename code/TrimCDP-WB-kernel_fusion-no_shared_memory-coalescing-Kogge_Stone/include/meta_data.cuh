@@ -13,7 +13,7 @@ public:
 	feature_t *vert_status_prev;
 	feature_t *record; // 记录了SSSP任务后的状态
 	feature_t *lb_record;
-	feature_t *in_queue;
+	feature_t *merge_or_grow;
 	feature_t *temp_st;
 	bit_t *bitmap;
 	int width;
@@ -92,7 +92,7 @@ public:
 		H_ERR(cudaMalloc((void **)&lb_record, FEAT_SZ * width)); // for compute
 		H_ERR(cudaMalloc((void **)&record, FEAT_SZ * width));	 // one label
 		H_ERR(cudaMalloc((void **)&lb0, FEAT_SZ * width));		 // w1 w2
-		H_ERR(cudaMalloc((void **)&in_queue, FEAT_SZ * width));
+		H_ERR(cudaMalloc((void **)&merge_or_grow, FEAT_SZ * width));
 		H_ERR(cudaMalloc((void **)&bitmap, BIT_SZ));
 		H_ERR(cudaMemset(bitmap, 0, BIT_SZ));
 		cudaMallocManaged((void **)&max_queue_size, sizeof(unsigned int));
@@ -172,7 +172,7 @@ public:
 		cudaFree(temp_st);
 		cudaFree(record);
 		cudaFree(lb_record);
-		cudaFree(in_queue);
+		cudaFree(merge_or_grow);
 	}
 };
 

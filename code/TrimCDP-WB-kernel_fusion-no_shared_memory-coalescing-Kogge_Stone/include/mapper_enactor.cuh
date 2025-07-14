@@ -167,7 +167,7 @@ balanced_push_kernel(
 			mdata.worklist_sz_lrg[0] = 0;
 		}
 		// worklist_gather._push_coalesced_scan_random_list(TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd+1);
-		worklist_gather._push_coalesced_scan_random_list_best_atomic(TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd + 1, mdata.record);
+		worklist_gather._push_coalesced_scan_random_list_best_atomic_2(TID, wid_in_blk, tid_in_wrp, wcount_in_blk, GRNTY, level_thd + 1, mdata.record,blockIdx.x);
 		// compute on the graph
 		// and generate frontiers immediately
 		global_barrier.sync_grid_opt();
@@ -351,7 +351,45 @@ hybrid_bin_scan_push_kernel_only(
 		level[0] = level_thd;
 }
 
+__global__ void
+mapper_bin_push_kernel(
+	feature_t level,
+	gpu_graph ggraph,
+	meta_data mdata,
+	mapper compute_mapper)
+{
 
+	const index_t TID = threadIdx.x + blockIdx.x * blockDim.x;
+	const index_t GRNTY = blockDim.x * gridDim.x;
+	const index_t tid_in_wrp = threadIdx.x & 31;
+	// const index_t wid_in_blk = threadIdx.x >> 5;
+	const index_t wid_in_grd = TID >> 5;
+	// const index_t wcount_in_blk = blockDim.x >> 5;
+	const index_t WGRNTY = GRNTY >> 5;
+	const index_t BIN_OFF = TID * BIN_SZ;
+	if (TID == 0)
+		mdata.worklist_sz_sml[0] = 0;
+	vertex_t bests = *(mdata.best);
+	vertex_t my_bin_sz = 0;
+	index_t appr_work = 0;
+	compute_mapper.mapper_bin_push(
+		appr_work,
+		mdata.worklist_sz_sml,
+		my_bin_sz,
+		mdata.worklist_bin,
+		mdata.worklist_sz_mid[0],
+		mdata.worklist_mid,
+		wid_in_grd,
+		32,
+		WGRNTY,
+		tid_in_wrp,
+		level,
+		BIN_OFF, mdata.best, mdata.record, mdata.lb_record);
+
+	assert(mdata.worklist_sz_sml[0] != -1);
+
+	mdata.cat_thd_count_mid[TID] = my_bin_sz;
+}
 
 int balanced_push(
 	int cfg_blk_size,

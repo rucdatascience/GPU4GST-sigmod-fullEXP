@@ -28,7 +28,7 @@ public:
 	feature_t *vert_status_prev;
 	feature_t *one_label_lower_bound;
 	feature_t *lb_record;
-	feature_t *in_queue;
+	feature_t *merge_or_grow;
 	int width, full, *lb0;
 	volatile int *best;
 	int *merge_pointer;
@@ -50,7 +50,7 @@ public:
 		beg_pos = ggraph.beg_pos;
 		width = wid;
 		lb0 = mdata.lb0;
-		in_queue = mdata.in_queue;
+		merge_or_grow = mdata.merge_or_grow;
 		lb_record = mdata.lb_record;
 		one_label_lower_bound = mdata.record;
 		best = mdata.best;
@@ -109,7 +109,7 @@ public:
 					int lb = get_lb(one_label_lower_bound, lb0, vert_end * width, x_slash);
 					atomicMin(vert_status + update_dest, dist);
 					if (lb + dist <= (*best))
-						in_queue[update_dest] = 1;
+						merge_or_grow[update_dest] = 1;
 				}
 			}
 
@@ -128,7 +128,7 @@ public:
 					atomicMin(vert_status + update_dest, dist);
 					int lb = get_lb_m(one_label_lower_bound, lb0, vline, x_slash, dist);
 					if (lb + dist <= (*best))
-						in_queue[update_dest] = 1;
+						merge_or_grow[update_dest] = 1;
 				}
 			}
 		}
