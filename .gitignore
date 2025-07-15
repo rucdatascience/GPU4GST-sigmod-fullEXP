@@ -1,5 +1,17 @@
 build/
-data/
+# data/ - 移除这行，因为我们需要包含tuple_text_to_bin.cpp和twitch数据集
+# 忽略data文件夹中的其他内容，但保留特定文件
+data/*
+!data/tuple_text_to_bin.cpp
+!data/Twitch*
+!data/Twitch.in
+!data/Twitch_beg_pos.bin
+!data/Twitch_csr.bin
+!data/Twitch_weight.bin
+!data/Twitch.g
+!data/Twitch3.csv
+!data/Twitch5.csv
+!data/Twitch7.csv
 .dist/
 cpu_alg/
 res/
