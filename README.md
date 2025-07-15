@@ -147,7 +147,7 @@ All codes are located in the 'code' folder. There are 18 subfolders, each corres
 
 | Algorithm Variant | Kernel Fusion | Shared Memory | Global Memory Coalescing | Kogge-Stone Prefix Scan | Description |
 |-------------------|---------------|---------------|-------------------------|------------------------|-------------|
-| **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone** | ✓ | ✓ | ✓ | ✓ | Version with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan |
+| **D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone** | ✓ | ✓ | ✓ | ✓ | Version with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan |
 | **D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone** | ✗ | ✓ | ✓ | ✓ | Version without kernel fusion but with shared memory, coalescing, and Kogge-Stone prefix scan |
 | **D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone** | ✓ | ✗ | ✓ | ✓ | Version with kernel fusion, global memory coalescing, and Kogge-Stone prefix scan |
 | **D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone** | ✓ | ✗ | ✗ | ✗ | Version with only kernel fusion optimization |
@@ -334,7 +334,7 @@ sh sh/additional_exp/exp_D-TrimCDP-multi-core-CPU.sh
 
 The command to run this experiment is:
  ```
-sh code/TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+sh sh/additional_exp/exp_TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone.sh
  ```
 
 ### TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone:
@@ -345,7 +345,7 @@ sh code/TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp
 
 The command to run this experiment is:
  ```
-sh code/TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone.sh
  ```
 
 ### TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone:
@@ -356,7 +356,7 @@ sh code/TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_
 
 The command to run this experiment is:
  ```
-sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+sh sh/additional_exp/exp_TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone.sh
  ```
 
 ### TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone:
@@ -367,7 +367,7 @@ sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/run_
 
 The command to run this experiment is:
  ```
-sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+sh sh/additional_exp/exp_TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone.sh
  ```
 
 ### TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone:
@@ -378,18 +378,18 @@ sh code/TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/s
 
 The command to run this experiment is:
  ```
-sh code/TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/sh/run_exp_GPU2_nonHop.sh
+sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone.sh
  ```
 
-### D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone:
-- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
-- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with all optimizations including Kogge-Stone.
-- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with all optimizations.
-- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
+### D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone:
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB with kernel fusion, shared memory, global memory coalescing, and Kogge-Stone prefix scan optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB with all optimizations including Kogge-Stone.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone/include/mapper.cuh" contains codes for performing specific operations on vertices with all optimizations.
+- "D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations with Kogge-Stone prefix scan.
 
 The command to run this experiment is:
  ```
-sh code/D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/sh/run_exp_GPU2_Hop.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing-Kogge-Stone.sh
  ```
 
 ### D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone:
@@ -400,7 +400,7 @@ sh code/D-TrimCDP-WB-kernel_fusion-shared_memory-coalescing_Kogge-Stone/sh/run_e
 
 The command to run this experiment is:
  ```
-sh code/D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone.sh
  ```
 
 ### D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone:
@@ -411,7 +411,7 @@ sh code/D-TrimCDP-WB-no_kernel_fusion-shared_memory-coalescing-Kogge_Stone/sh/ru
 
 The command to run this experiment is:
  ```
-sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone.sh
  ```
 
 ### D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone:
@@ -422,7 +422,7 @@ sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone/sh/ru
 
 The command to run this experiment is:
  ```
-sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone.sh
  ```
 
 ### D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone:
@@ -433,7 +433,7 @@ sh code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone
 
 The command to run this experiment is:
  ```
-sh code/D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone/sh/run_exp_GPU2_Hop.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion-no_shared_memory-coalescing-no_Kogge_Stone.sh
  ```
 
 

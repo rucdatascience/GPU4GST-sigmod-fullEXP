@@ -1,4 +1,4 @@
-cd code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing
+cd code/D-TrimCDP-WB-kernel_fusion-no_shared_memory-no_coalescing-no_Kogge_Stone
 mkdir build
 cd build
 cmake ..

@@ -1,9 +1,10 @@
-cd code/TrimCDP-WB-KF-SM
+cd code/TrimCDP-WB-kernel_fusion-no_shared_memory-coalescing-Kogge_Stone
 mkdir build
 cd build
 cmake .. 
 make
 #exe type path data_name T task_start_num(from 0) task_end_num
+
 
 ./bin/TrimCDP-WB 2 ../../../data/ Musae 3 0 299
 ./bin/TrimCDP-WB 2 ../../../data/ Musae 5 0 299

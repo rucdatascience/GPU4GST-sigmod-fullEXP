@@ -233,7 +233,7 @@ public:
 		cat_thd_count_lrg[TID] = my_front_lrg;
 
 		// prefix-scan
-		_grid_scan_agg<vertex_t, vertex_t>(WOFF, WIDL, WCOUNT,
+		 _grid_scan_agg_2_no_storage<vertex_t, vertex_t>(WOFF, WIDL, WCOUNT,
 										   my_front_sml,
 										   my_front_mid,
 										   my_front_lrg,
