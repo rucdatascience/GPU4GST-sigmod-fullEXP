@@ -137,7 +137,7 @@ __global__ void one_label_lb_1(int *tree, int width, int *lb0, int N, int G, int
 	}
 }
 
-__global__ void count_used(int *tree, int width, int *counts, int N)
+__global__ void count_used(int *tree, int width, int *counts,int N)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < N)
@@ -145,8 +145,9 @@ __global__ void count_used(int *tree, int width, int *counts, int N)
 		int vline = idx * width;
 		for (int x = 1; x < width; x++)
 		{
-			if (tree[vline + x] != inf)
-				atomicAdd(counts, 1);
+			if(tree[vline+x]!=inf)
+			atomicAdd(counts,1);
+			
 		}
 	}
 }
@@ -167,15 +168,14 @@ int main(int args, char **argv)
 	string file_beg = path + data_name + "_beg_pos.bin";
 	string file_adj = path + data_name + "_csr.bin";
 	string file_weight = path + data_name + "_weight.bin";
-	cudaDeviceProp prop;
-	cudaSetDevice(3);
-	for (int i = 0; i < 4; i++)
-	{
-		cudaDeviceProp prop;
-		cudaGetDeviceProperties(&prop, i);
-		std::cout << "Device Number: " << i << std::endl;
-		std::cout << "  Device name:                " << prop.name << std::endl;
-	}
+	 cudaDeviceProp prop;
+	 cudaSetDevice(3);
+    for (int i = 0; i < 4; i++) {
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, i);
+    std::cout << "Device Number: " << i << std::endl;
+    std::cout << "  Device name:                " << prop.name << std::endl;
+}
 	const char *file_beg_pos = file_beg.c_str();
 	const char *file_adj_list = file_adj.c_str();
 	const char *file_weight_list = file_weight.c_str();
@@ -184,9 +184,9 @@ int main(int args, char **argv)
 	int *non_overlapped_group_gpu, *non_overlapped_group_pointer, *can_find, *w_d, *w1_d;
 	// Read graph to CPU
 	graph<long, long, long, vertex_t, index_t, weight_t>
-		*ginst = new graph<long, long, long, vertex_t, index_t, weight_t>(file_beg_pos, file_adj_list, file_weight_list);
+	*ginst = new graph<long, long, long, vertex_t, index_t, weight_t>(file_beg_pos, file_adj_list, file_weight_list);
 	ginst->read_gi(path + data_name + ".g", path + data_name + to_string(T) + ".csv");
-	cout << "inquire have " << ginst->inquire.size() << endl;
+	cout<<"inquire have "<<ginst->inquire.size()<<endl;
 	int G = ginst->inquire[0].size(), V = ginst->vert_count;
 	int width = 1 << G, problem_size = V * width, sum_cost = 0;
 	non_overlapped_group_sets s = graph_v_of_v_idealID_DPBF_non_overlapped_group_sets_gpu(width - 1);
@@ -200,8 +200,7 @@ int main(int args, char **argv)
 	meta_data mdata(ginst->vert_count, ginst->edge_count, width);
 	std::vector<int> contain_group_vertices, costs(100);
 	std::vector<double> times(100);
-	int *host_tree = new int[width * V], *inqueue = new int[problem_size];
-	int *one_label_h = new int[width * V];
+	int *host_tree = new int[width * V], *inqueue = new int[problem_size];int *one_label_h = new int[width * V];
 	int w[G * G * width], w1[G * width], vv[G][G];
 	std::fill(inqueue, inqueue + problem_size, 0);
 	feature_t *level, *level_h;
@@ -238,7 +237,7 @@ int main(int args, char **argv)
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path + "result/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"KF-NoSM/exp_GPU2_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU2_nonHop_time,GPU2_nonHop_cost,GPU2_nonHop_memory,counts,process_num" << endl;
 	Barrier global_barrier(BLKS_NUM);
@@ -252,7 +251,7 @@ int main(int args, char **argv)
 			task += to_string(ginst->inquire[ii][j]) + " ";
 		}
 		std::cout << "------------------------------------------------------------" << endl;
-		cout << data_name << " interation " << ii << " " << endl;
+		cout <<data_name  <<" interation " << ii << " "<<endl;
 		//  cout << ginst->inquire[i][j] << " ";
 		std::fill(host_tree, host_tree + width * V, inf);
 		cudaMemcpy(mdata.vert_status_prev, host_tree, problem_size * sizeof(int), cudaMemcpyHostToDevice);
@@ -277,7 +276,7 @@ int main(int args, char **argv)
 		// mapper_merge_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double stime = wtime();
 		cudaMemset(level, 0, 10 * sizeof(feature_t));
-
+		
 		mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier, 1);
 		double sstime = wtime() - stime;
 		H_ERR(cudaMemcpy(mdata.record, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToDevice));
@@ -289,7 +288,7 @@ int main(int args, char **argv)
 		// cout << endl;
 		std::fill(host_tree, host_tree + problem_size, inf);
 		cudaMemcpy(mdata.vert_status_prev, host_tree, problem_size * sizeof(int), cudaMemcpyHostToDevice);
-
+		
 		std::fill(inqueue, inqueue + problem_size, 0);
 		set_max_ID(ginst->group_graph, ginst->inquire[ii], host_tree, contain_group_vertices, width); // 在置初值前传递参数到prev
 		for (auto it = contain_group_vertices.begin(); it != contain_group_vertices.end(); it++)
@@ -311,7 +310,7 @@ int main(int args, char **argv)
 		// 	cout << " v " << dis_queue[i] / width << " p " << dis_queue[i] % width << "  ";
 		// }
 		// cout << endl;
-
+		
 		for (size_t i = 0; i < G; i++)
 		{
 			for (size_t j = 0; j < G; j++)
@@ -327,7 +326,7 @@ int main(int args, char **argv)
 		// cudaMemcpy(&work_size, (void **)&mdata.worklist_sz_sml, sizeof(int), cudaMemcpyDeviceToHost);
 		// cout << "work size " << work_size << endl;
 		// mapper_hybrid_push_merge(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier, 0);
-
+		
 		cudaMemcpy(one_label_h, mdata.record, width * V * sizeof(int), cudaMemcpyDeviceToHost);
 		for (size_t i = 0; i < 5; i++)
 		{
@@ -419,7 +418,7 @@ int main(int args, char **argv)
 		balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		double ftime = wtime() - time; // 一阶段推的耗时
 		cudaMemcpy(level_h, level, 10 * sizeof(feature_t), cudaMemcpyDeviceToHost);
-		// std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " record best " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5]<<"total"<<level_h[6] << "\n";
+		//std::cout << "iteration: " << level_h[0] << " queue size " << level_h[1] << " record best " << level_h[2] << "overflow " << level_h[3]<<" used "<<level_h[5]<<"total"<<level_h[6] << "\n";
 		cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// for (size_t i = 0; i < V; i++)
 		// {
@@ -430,7 +429,7 @@ int main(int args, char **argv)
 		// 	}
 		// 	cout << endl;
 		// }
-		// cudaMemcpy(one_label_h, worklist_gather.temp_st, width * V * sizeof(int), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(one_label_h, worklist_gather.temp_st, width * V * sizeof(int), cudaMemcpyDeviceToHost);
 		// 			for (size_t i = 0; i <V; i++)
 		// {
 		// 	cout << i << "  ";
@@ -449,6 +448,7 @@ int main(int args, char **argv)
 		sum_cost += minc;
 		// balanced_push(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 
+	
 		// cudaMemcpy(inqueue, mdata.in_queue, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 		// cudaMemcpy(host_tree, mdata.vert_status, problem_size * sizeof(int), cudaMemcpyDeviceToHost);
 
@@ -484,20 +484,17 @@ int main(int args, char **argv)
 		// push_pull_opt(blk_size, level, ggraph, mdata, compute_mapper, worklist_gather, global_barrier);
 		time = wtime() - time;
 		int *set_num;
-		cudaMallocManaged((void **)&set_num, sizeof(int));
+		cudaMallocManaged((void **)&set_num,sizeof(int));
 
 		count_used<<<(V + THREAD_PER_BLOCK - 1) / THREAD_PER_BLOCK, THREAD_PER_BLOCK>>>(mdata.vert_status, width, set_num, V);
 		cudaDeviceSynchronize();
-		int mem_MB = (level_h[5] + V * width + *set_num);
-		// cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
-		outputFile << ii << "," << task << "," << ftime << "," << minc << "," << mem_MB << "," << *set_num << "," << level_h[6] << endl;
-		cout << "time " << ftime << endl;
+		int mem_MB = (level_h[5]+V*width+*set_num);
+		//cout<<"set num "<<*set_num<<" queue size "<<level_h[5]<<" V*width "<<V*width<<endl;
+		outputFile << ii << "," << task << "," << ftime << "," << minc << "," << mem_MB<<","<<*set_num<<","<<level_h[6] << endl;
 		sum_time += ftime;
 		// std::cout << "Total iteration: " << level_h[0] << "\n";
 	}
-	delete[] host_tree;
-	delete[] inqueue;
-	delete[] one_label_h;
+	delete[] host_tree;delete []inqueue;delete []one_label_h;
 
 	mdata.release();
 	ggraph.release();

@@ -306,6 +306,28 @@ The command to run this experiment is:
 sh sh/additional_exp/D-TrimCDP-WB-no_global_memory_coalescing.sh
 ```
 
+### TrimCDP-WB-no_virtual_split:
+- "TrimCDP-WB-no_virtual_split/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without virtual splitting optimization.
+- "TrimCDP-WB-no_virtual_split/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB without virtual splitting.
+- "TrimCDP-WB-no_virtual_split/include/mapper.cuh" contains codes for performing specific operations on vertices without virtual splitting.
+- "TrimCDP-WB-no_virtual_split/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+```
+sh sh/exp_TrimCDP-WB-no_virtual_split.sh
+```
+
+### D-TrimCDP-WB-no_virtual_split:
+- "D-TrimCDP-WB-no_virtual_split/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without virtual splitting optimization.
+- "D-TrimCDP-WB-no_virtual_split/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB without virtual splitting.
+- "D-TrimCDP-WB-no_virtual_split/include/mapper.cuh" contains codes for performing specific operations on vertices without virtual splitting.
+- "D-TrimCDP-WB-no_virtual_split/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+```
+sh sh/exp_D-TrimCDP-WB-no_virtual_split.sh
+```
+
 ### TrimCDP-multi-core-CPU:
 - "TrimCDP-multi-core-CPU/src/main.cpp" contains codes for conducting experiments for TrimCDP multi-core CPU version.
 - "TrimCDP-multi-core-CPU/include/CPUNONHOP.h" contains codes of TrimCDP multi-core CPU implementation.

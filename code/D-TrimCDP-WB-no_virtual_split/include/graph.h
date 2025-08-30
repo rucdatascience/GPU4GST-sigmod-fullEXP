@@ -16,15 +16,16 @@ typedef struct non_overlapped_group_sets{
 	std::vector<int> non_overlapped_group_sets_IDs_pointer_host, non_overlapped_group_sets_IDs;
 	int length;
 }non_overlapped_group_sets;
-void set_max_ID(graph_v_of_v_idealID &group_graph, std::vector<int> &cumpulsory_group_vertices, int *host_tree, std::vector<int> &contain_group_vertices,int width)
+void set_max_ID(graph_v_of_v_idealID &group_graph, std::vector<int> &cumpulsory_group_vertices, int *host_tree, std::vector<int> &contain_group_vertices,int width,int D)
 {
-	int bit_num = 1, v;
+	uint bit_num = 1, v;
+	uint val1 = width*(D+1),val2 = D+1;
 	for (auto it = cumpulsory_group_vertices.begin(); it != cumpulsory_group_vertices.end(); it++, bit_num <<= 1)
 	{
 		for (size_t to = 0; to < group_graph[*it].size(); to++)
 		{
 			v = group_graph[*it][to].first;
-			host_tree[v*width+bit_num] = 0;
+			host_tree[v*val1+bit_num*val2] = 0;
 			contain_group_vertices.push_back(v);
 		}
 		
@@ -77,20 +78,6 @@ class graph
 		new_index_t edge_count;
 		graph_v_of_v_idealID group_graph;
 		std::vector<std::vector<int>>inquire;
-		
-		/*大度数节点分割相关*/
-		std::vector<new_vert_t> mother_map;   // CPU端：子节点到父节点的映射
-		std::vector<new_vert_t> son_d_map;    // CPU端：节点到子节点的映射
-		std::vector<new_index_t> son_range_start_map;  // CPU端：每个节点的子节点范围起始位置
-		std::vector<new_index_t> son_range_end_map;    // CPU端：每个节点的子节点范围结束位置
-		std::vector<new_vert_t> son_list_map;          // CPU端：所有子节点的列表
-		std::vector<std::pair<new_index_t, new_index_t>> original_son_ranges;  // 原始子节点范围信息
-		new_index_t original_vert_count;      // 原始节点数量
-		new_index_t new_vert_count;           // 分割后的节点数量
-		new_index_t new_edge_count;           // 分割后的边数量
-		new_vert_t *new_adj_list;             // 新的邻接表
-		new_index_t *new_beg_pos;             // 新的起始位置数组
-		new_weight_t *new_weight;             // 新的权重数组
 	public:
 		graph(){};
 		~graph(){};
@@ -124,17 +111,13 @@ class graph
 			std::cout<<"read inquire over"<<std::endl;
 			//non_overlapped_group_sets((1<<(this->inquire[0].size())-1));
 		};
-		
-		// 大度数节点分割函数
-		void split_high_degree_vertices();
-		void build_new_csr();
 };
-int get_max(int vertex, int *host_tree, int width)
+int get_max(uint vertex, int *host_tree, int width,uint val1,uint val2)
 {
 	int re = 0;
 	for (size_t i = 1; i < width; i <<= 1)
 	{
-		if (host_tree[vertex*width+i] == 0)
+		if (host_tree[vertex*val1+i*val2] == 0)
 		{
 			re += i;
 		}

@@ -24,7 +24,6 @@ public:
 	weight_t *weight_list;
 	index_t *beg_pos;
 	index_t vert_count;
-	index_t new_vert_count; // 扩展后的顶点数，用于边界检查
 	feature_t *vert_status;
 	feature_t *vert_status_prev;
 	feature_t *one_label_lower_bound;
@@ -38,16 +37,6 @@ public:
 	cb_mapper edge_compute;
 	cb_mapper edge_compute_push;
 	cb_mapper edge_compute_pull;
-	
-	/*大度数节点分割映射*/
-	vertex_t *son_d;    // GPU端：节点到子节点的映射
-	vertex_t *mother_d; // GPU端：子节点到父节点的映射
-	
-	/*大度数节点分割映射扩展*/
-	index_t *son_range_start_d;  // GPU端：每个节点的子节点范围起始位置
-	index_t *son_range_end_d;    // GPU端：每个节点的子节点范围结束位置
-	vertex_t *son_list_d;        // GPU端：所有子节点的列表
-	index_t son_list_d_size;     // son_list_d数组的大小
 
 public:
 	// constructor
@@ -70,20 +59,9 @@ public:
 		merge_pointer = ggraph.merge_pointer_d;
 
 		vert_count = ggraph.vert_count;
-		new_vert_count = ggraph.new_vert_count; // 扩展后的顶点数
 		vert_status = mdata.vert_status;
 		vert_status_prev = mdata.vert_status_prev;
 		// cat_thd_count_sml = mdata.cat_thd_count_sml;
-		
-		// 初始化大度数节点分割映射
-		son_d = ggraph.son_d;
-		mother_d = ggraph.mother_d;
-		
-		// 初始化大度数节点分割扩展映射
-		son_range_start_d = ggraph.son_range_start_d;
-		son_range_end_d = ggraph.son_range_end_d;
-		son_list_d = ggraph.son_list_d;
-		son_list_d_size = ggraph.son_list_d_size;
 
 		edge_compute_push = user_mapper_push;
 		edge_compute_pull = user_mapper_pull;
@@ -360,96 +338,6 @@ public:
 		// Make sure NO overflow!
 		if (my_front_count >= BIN_SZ)
 			overflow_indicator[0] = -1;
-	}
-
-	// Grow phase - 只处理grow操作，不处理merge操作
-	__forceinline__ __device__ void
-	mapper_push_grow(		 
-		vertex_t wqueue, // 这个是本轮的用值
-		vertex_t *worklist,
-		index_t *cat_thd_count, // 这个是本轮返回值
-		const index_t GRP_ID,
-		const index_t GRP_SZ,
-		const index_t GRP_COUNT,
-		const index_t THD_OFF,
-		feature_t level,
-		volatile vertex_t *bests,
-		feature_t *records)
-	{
-		index_t appr_work = 0;
-		weight_t weight;
-		
-		const vertex_t WSZ = wqueue;
-		for (index_t i = GRP_ID; i < WSZ; i += GRP_COUNT)
-		{
-			vertex_t frontier = worklist[i];
-			in_queue[frontier]=0;
-			int v = frontier / width, p = frontier % width;
-			index_t beg = beg_pos[v], end = beg_pos[v + 1], x_slash = full - p, vline = v * width;
-			
-			int parent_vertex = mother_d[v];
-			// if(parent_vertex!=v)
-			// {
-			// 	printf("v=%d parent = %d,beg=%d end=%d\n",v,parent_vertex,beg,end);
-			// }
-			for (index_t j = beg + THD_OFF; j < end; j += GRP_SZ)
-			{
-				vertex_t vert_end = adj_list[j];
-				weight = weight_list[j];
-				vertex_t update_dest = vert_end * width + p;
-				feature_t dist = vert_status[parent_vertex*width+p] + weight;
-
-				if (vert_status[update_dest] > dist)
-				{
-					int lb = get_lb(one_label_lower_bound, lb0, parent_vertex * width, x_slash);
-					atomicMin(vert_status + update_dest, dist);
-					if (lb + dist <= (*best))
-						in_queue[update_dest] = 1;
-				}
-			}
-		}
-
-		cat_thd_count[threadIdx.x + blockIdx.x * blockDim.x] = appr_work;
-	}
-
-	// Merge phase - 只处理merge操作，不处理grow操作
-	__forceinline__ __device__ void
-	mapper_push_merge(		 
-		vertex_t wqueue, // 这个是本轮的用值
-		vertex_t *worklist,
-		const index_t GRP_ID,
-		const index_t GRP_SZ,
-		const index_t GRP_COUNT,
-		const index_t THD_OFF,
-		feature_t level,
-		volatile vertex_t *bests,
-		feature_t *records)
-	{
-		const vertex_t WSZ = wqueue;
-		for (index_t i = GRP_ID; i < WSZ; i += GRP_COUNT)
-		{
-			vertex_t frontier = worklist[i];
-			in_queue[frontier]=0;
-			int v = frontier / width, p = frontier % width;
-			index_t beg = merge_pointer[p], end = merge_pointer[p + 1];
-			index_t vline = v * width;
-			
-			for (index_t j = beg + THD_OFF; j < end; j += GRP_SZ)
-			{
-				weight_t weight = vert_status[vline + merge_groups[j]];
-				vertex_t update_dest = frontier + merge_groups[j];
-
-				feature_t dist = vert_status[frontier] + weight;
-				int x_slash = full - p - merge_groups[j];
-				if (vert_status[update_dest] > dist)
-				{
-					atomicMin(vert_status + update_dest, dist);
-					int lb = get_lb_m(one_label_lower_bound, lb0, vline, x_slash, dist);
-					if (lb + dist <= (*best))
-						in_queue[update_dest] = 1;
-				}
-			}
-		}
 	}
 
 

@@ -179,7 +179,7 @@ __global__ void balanced_push_kernel_atomic(
 	global_barrier.sync_grid_opt();
 
 	int r = 0;
-	while (true)
+	while (true && ++r < 20)
 	{
 		// 平衡
 		mdata.future_work[0] = 0;
@@ -187,13 +187,11 @@ __global__ void balanced_push_kernel_atomic(
 
 		if (!TID)
 		{
-			//printf("vert_count: %d\n", ggraph.vert_count);
 			int tot = mdata.worklist_sz_mid[0] + mdata.worklist_sz_sml[0] + mdata.worklist_sz_lrg[0];
 			level[6] += tot;
 			mdata.worklist_sz_mid[0] = 0; // 下面应该是在扫描执行了 先把新的队列长度置0
 			mdata.worklist_sz_sml[0] = 0; // indicate whether bin overflow
 			mdata.worklist_sz_lrg[0] = 0;
-			mdata.worklist_sz_merge[0] = 0;
 			if (tot > level[5])
 				level[5] = tot;
 		}
@@ -203,11 +201,11 @@ __global__ void balanced_push_kernel_atomic(
 		global_barrier.sync_grid_opt();
 		if (mdata.worklist_sz_sml[0] +
 				mdata.worklist_sz_mid[0] +
-				mdata.worklist_sz_lrg[0]+mdata.worklist_sz_merge[0] ==
+				mdata.worklist_sz_lrg[0] ==
 			0)
 			break;
 
-		compute_mapper.mapper_push_grow(
+		compute_mapper.mapper_push(
 			mdata.worklist_sz_lrg[0],
 			mdata.worklist_lrg,
 			mdata.cat_thd_count_lrg,
@@ -217,7 +215,7 @@ __global__ void balanced_push_kernel_atomic(
 			threadIdx.x, /*thread off intra group*/
 			level_thd);
 
-		compute_mapper.mapper_push_grow(
+		compute_mapper.mapper_push(
 			mdata.worklist_sz_mid[0],
 			mdata.worklist_mid,
 			mdata.cat_thd_count_mid,
@@ -228,7 +226,7 @@ __global__ void balanced_push_kernel_atomic(
 			tid_in_wrp, /*thread off intra group*/
 			level_thd);
 
-		compute_mapper.mapper_push_grow(
+		compute_mapper.mapper_push(
 			mdata.worklist_sz_sml[0],
 			mdata.worklist_sml,
 			mdata.cat_thd_count_sml,
@@ -237,14 +235,7 @@ __global__ void balanced_push_kernel_atomic(
 			GRNTY, /*group count*/
 			0,	   /*thread off intra group*/
 			level_thd);
-		compute_mapper.mapper_push_merge(
-			mdata.worklist_sz_merge[0],
-			mdata.worklist_merge,
-			TID,   /*group id*/
-			1,	   /*group size*/
-			GRNTY, /*group count*/
-			0,	   /*thread off intra group*/
-			level_thd);
+
 		//      global_barrier.sync_grid_opt();
 
 		_grid_sum<vertex_t, index_t>(mdata.cat_thd_count_sml[TID] +

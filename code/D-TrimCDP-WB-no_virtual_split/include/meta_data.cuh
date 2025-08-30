@@ -42,10 +42,6 @@ class meta_data
 		index_t *worklist_mid;
 		index_t *worklist_lrg;
 
-		/*merge worklist*/
-		index_t *worklist_merge;
-		volatile vertex_t *worklist_sz_merge;
-
 		vertex_t *worklist_bin;
 		volatile vertex_t *worklist_sz_sml;
 		volatile vertex_t *worklist_sz_mid;
@@ -90,10 +86,6 @@ class meta_data
 			cudaMemGetInfo(&free_byte, &total_byte);
 			H_ERR(cudaMalloc((void **)&worklist_mid,0.25*VERT_SZ *width*(diameter+1)));
 			H_ERR(cudaMalloc((void **)&worklist_lrg,0.25*VERT_SZ*width*(diameter+1)));
-			
-			/*merge worklist*/
-			H_ERR(cudaMalloc((void **)&worklist_merge, 0.25*VERT_SZ*width*(diameter+1)));
-			
 			H_ERR(cudaMalloc((void **)&cat_thd_count_sml,CATE_SZ));
 			H_ERR(cudaMalloc((void **)&cat_thd_count_mid,CATE_SZ));
 			H_ERR(cudaMalloc((void **)&cat_thd_count_lrg,CATE_SZ));
@@ -114,7 +106,6 @@ class meta_data
 			H_ERR(cudaMalloc((void **)&worklist_sz_sml,sizeof(vertex_t)));
 			H_ERR(cudaMalloc((void **)&worklist_sz_mid,sizeof(vertex_t)));
 			H_ERR(cudaMalloc((void **)&worklist_sz_lrg,sizeof(vertex_t)));
-			H_ERR(cudaMalloc((void **)&worklist_sz_merge,sizeof(vertex_t)));
 			H_ERR(cudaMalloc((void **)&best,sizeof(vertex_t)));
 					
 
@@ -136,7 +127,6 @@ class meta_data
 			cudaFree(worklist_lrg);
 			cudaFree(worklist_mid);
 			cudaFree(worklist_sml);
-			cudaFree(worklist_merge);
 			cudaFree(worklist_bin);
 
 
