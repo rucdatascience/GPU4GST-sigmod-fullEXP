@@ -243,60 +243,8 @@ public:
 										   worklist_sz_sml,
 										   worklist_sz_mid,
 										   worklist_sz_lrg);
-		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
-		{
-				int v = my_beg / VAL1;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
 
-				if (degree < SML_MID)
-					{
-						degree = beg_pos[1] - beg_pos[0];
-					}
-				else if (degree > MID_LRG)
-					{degree = beg_pos[50] - beg_pos[49];}
-				else
-					{
-						degree = beg_pos[100] - beg_pos[99];
-					}
-		}
-		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
-		{
-				int v = my_beg / VAL1;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
 
-				if (degree < SML_MID)
-					{
-						degree = beg_pos[1] - beg_pos[0];
-					}
-				else if (degree > MID_LRG)
-					{degree = beg_pos[50] - beg_pos[49];}
-				else
-					{
-						degree = beg_pos[100] - beg_pos[99];
-					}
-		}
-		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
-		{
-				int v = my_beg / VAL1;
-				index_t degree = beg_pos[v + 1] - beg_pos[v];
-				if (degree == 0)
-					continue;
-
-				if (degree < SML_MID)
-					{
-						degree = beg_pos[1] - beg_pos[0];
-					}
-				else if (degree > MID_LRG)
-					{degree = beg_pos[50] - beg_pos[49];}
-				else
-					{
-						degree = beg_pos[100] - beg_pos[99];
-					}
-		}
 		for (index_t my_beg = TID; my_beg < vert_count * VAL1; my_beg += GRNTY)
 		{
 			if (vert_status[my_beg]!=vert_status_prev[my_beg])
