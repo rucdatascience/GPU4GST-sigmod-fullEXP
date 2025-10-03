@@ -106,140 +106,7 @@ __forceinline__ __device__ void _grid_scan(
 	output = value - input + smem[warp_id_inblk] + my_cta_off;
 	__syncthreads();
 }
-// 真正无中间存储的前缀扫描版本
-template<typename data_t, typename index_t>
-__forceinline__ __device__ void _grid_scan_agg_2_no_storage(
-		const index_t thd_id_inwarp,
-		const index_t warp_id_inblk,
-		const index_t warp_count_inblk,
-		const data_t input_sml, 
-		const data_t input_mid, 
-		const data_t input_lrg, 
-		data_t &output_sml,
-		data_t &output_mid,
-		data_t &output_lrg,
-		volatile data_t *total_sz_sml,
-		volatile data_t *total_sz_mid,
-		volatile data_t *total_sz_lrg
-){
 
-	data_t value_sml = input_sml;
-	data_t value_mid = input_mid;
-	data_t value_lrg = input_lrg;
-
-	// Warp scan: Kogge stone inclusive scan
-	warp_scan_inc<data_t,index_t>(value_sml,thd_id_inwarp);
-	warp_scan_inc<data_t,index_t>(value_mid,thd_id_inwarp);
-	warp_scan_inc<data_t,index_t>(value_lrg,thd_id_inwarp);
-	
-	// 获取warp总和（最后一个线程的值）
-	data_t warp_sum_sml = __shfl_sync(0xffffffff, value_sml, 31);
-	data_t warp_sum_mid = __shfl_sync(0xffffffff, value_mid, 31);
-	data_t warp_sum_lrg = __shfl_sync(0xffffffff, value_lrg, 31);
-	
-	// 计算warp内的前缀和（排除自己的输入）
-	data_t warp_prefix_sml = value_sml - input_sml;
-	data_t warp_prefix_mid = value_mid - input_mid;
-	data_t warp_prefix_lrg = value_lrg - input_lrg;
-	
-	// 初始化output为warp内的前缀和
-	output_sml = warp_prefix_sml;
-	output_mid = warp_prefix_mid;
-	output_lrg = warp_prefix_lrg;
-	
-	// 使用原子操作进行grid级别的扫描
-	// 每个warp的第一个线程负责进行原子操作
-	if (thd_id_inwarp == 0) {
-		data_t block_offset_sml = atomicAdd((int *)total_sz_sml, warp_sum_sml);
-		data_t block_offset_mid = atomicAdd((int *)total_sz_mid, warp_sum_mid);
-		data_t block_offset_lrg = atomicAdd((int *)total_sz_lrg, warp_sum_lrg);
-		
-		// 直接加到output上
-		output_sml += block_offset_sml;
-		output_mid += block_offset_mid;
-		output_lrg += block_offset_lrg;
-	}
-	
-	// 广播结果给warp内的所有线程
-	output_sml = __shfl_sync(0xffffffff, output_sml, 0);
-	output_mid = __shfl_sync(0xffffffff, output_mid, 0);
-	output_lrg = __shfl_sync(0xffffffff, output_lrg, 0);
-}
-
-// 原地使用Kogge-Stone算法的前缀扫描版本
-// 完全内联展开，不使用函数调用，避免函数调用开销
-template<typename data_t, typename index_t>
-__forceinline__ __device__ void _grid_scan_agg_kogge_stone_inline(
-		const index_t thd_id_inwarp,
-		const index_t warp_id_inblk,
-		const index_t warp_count_inblk,
-		const data_t input_sml, 
-		const data_t input_mid, 
-		const data_t input_lrg, 
-		data_t &output_sml,
-		data_t &output_mid,
-		data_t &output_lrg,
-		volatile data_t *total_sz_sml,
-		volatile data_t *total_sz_mid,
-		volatile data_t *total_sz_lrg
-){
-	// 原地Kogge-Stone warp scan，不使用函数调用
-	data_t value_sml = input_sml;
-	data_t value_mid = input_mid;
-	data_t value_lrg = input_lrg;
-
-	// 内联Kogge-Stone inclusive scan
-	value_sml += __shfl_up_sync(0xffffffff, value_sml, 1, 32) * (thd_id_inwarp >= 1);
-	value_sml += __shfl_up_sync(0xffffffff, value_sml, 2, 32) * (thd_id_inwarp >= 2);
-	value_sml += __shfl_up_sync(0xffffffff, value_sml, 4, 32) * (thd_id_inwarp >= 4);
-	value_sml += __shfl_up_sync(0xffffffff, value_sml, 8, 32) * (thd_id_inwarp >= 8);
-	value_sml += __shfl_up_sync(0xffffffff, value_sml, 16, 32) * (thd_id_inwarp >= 16);
-
-	value_mid += __shfl_up_sync(0xffffffff, value_mid, 1, 32) * (thd_id_inwarp >= 1);
-	value_mid += __shfl_up_sync(0xffffffff, value_mid, 2, 32) * (thd_id_inwarp >= 2);
-	value_mid += __shfl_up_sync(0xffffffff, value_mid, 4, 32) * (thd_id_inwarp >= 4);
-	value_mid += __shfl_up_sync(0xffffffff, value_mid, 8, 32) * (thd_id_inwarp >= 8);
-	value_mid += __shfl_up_sync(0xffffffff, value_mid, 16, 32) * (thd_id_inwarp >= 16);
-
-	value_lrg += __shfl_up_sync(0xffffffff, value_lrg, 1, 32) * (thd_id_inwarp >= 1);
-	value_lrg += __shfl_up_sync(0xffffffff, value_lrg, 2, 32) * (thd_id_inwarp >= 2);
-	value_lrg += __shfl_up_sync(0xffffffff, value_lrg, 4, 32) * (thd_id_inwarp >= 4);
-	value_lrg += __shfl_up_sync(0xffffffff, value_lrg, 8, 32) * (thd_id_inwarp >= 8);
-	value_lrg += __shfl_up_sync(0xffffffff, value_lrg, 16, 32) * (thd_id_inwarp >= 16);
-	
-	// 获取warp总和（最后一个线程的值）
-	data_t warp_sum_sml = __shfl_sync(0xffffffff, value_sml, 31);
-	data_t warp_sum_mid = __shfl_sync(0xffffffff, value_mid, 31);
-	data_t warp_sum_lrg = __shfl_sync(0xffffffff, value_lrg, 31);
-	
-	// 计算warp内的前缀和（排除自己的输入）
-	data_t warp_prefix_sml = value_sml - input_sml;
-	data_t warp_prefix_mid = value_mid - input_mid;
-	data_t warp_prefix_lrg = value_lrg - input_lrg;
-	
-	// 初始化output为warp内的前缀和
-	output_sml = warp_prefix_sml;
-	output_mid = warp_prefix_mid;
-	output_lrg = warp_prefix_lrg;
-	
-	// 使用原子操作进行grid级别的扫描
-	// 每个warp的第一个线程负责进行原子操作
-	if (thd_id_inwarp == 0) {
-		data_t block_offset_sml = atomicAdd((int *)total_sz_sml, warp_sum_sml);
-		data_t block_offset_mid = atomicAdd((int *)total_sz_mid, warp_sum_mid);
-		data_t block_offset_lrg = atomicAdd((int *)total_sz_lrg, warp_sum_lrg);
-		
-		// 直接加到output上
-		output_sml += block_offset_sml;
-		output_mid += block_offset_mid;
-		output_lrg += block_offset_lrg;
-	}
-	
-	// 广播结果给warp内的所有线程
-	output_sml = __shfl_sync(0xffffffff, output_sml, 0);
-	output_mid = __shfl_sync(0xffffffff, output_mid, 0);
-	output_lrg = __shfl_sync(0xffffffff, output_lrg, 0);
-}
 /* meta_data.cuh makes sure one warp can do CTA scan*/
 template<typename data_t, typename index_t>
 __forceinline__ __device__ void _grid_scan_agg(
@@ -268,147 +135,6 @@ __forceinline__ __device__ void _grid_scan_agg(
 	data_t my_cta_off_mid;
 	data_t my_cta_off_lrg;
 
-	//Warp scan: Kogge stone inclusive scan
-	warp_scan_inc<data_t,index_t>(value_sml,thd_id_inwarp);
-	warp_scan_inc<data_t,index_t>(value_mid,thd_id_inwarp);
-	warp_scan_inc<data_t,index_t>(value_lrg,thd_id_inwarp);
-	if(thd_id_inwarp == 31) 
-	{
-		smem_sml[warp_id_inblk] = value_sml;//把一个warp的集中在value上，存储在smem上，现在smem上面每一位对应warpid的warp总任务
-		smem_mid[warp_id_inblk] = value_mid;
-		smem_lrg[warp_id_inblk] = value_lrg;
-	}
-	__syncthreads();
-
-	data_t my_warp_sum_sml = smem_sml[warp_id_inblk];//其他线程要读取这个东西，通过smem更快
-	data_t my_warp_sum_mid = smem_mid[warp_id_inblk];
-	data_t my_warp_sum_lrg = smem_lrg[warp_id_inblk];
-	
-	__syncthreads();
-	
-	//CTA scan: use warp scan to do CTA scan
-	data_t value2; 
-	switch (warp_id_inblk)
-	{	//选一个block的前三个warp分别执行SML
-		case 0:
-			value2 = smem_sml[thd_id_inwarp] *
-				(thd_id_inwarp < warp_count_inblk);//block最大1024 也就是tid<32，warpid<32够用
-			warp_scan_inc<data_t, index_t>
-				(value2, thd_id_inwarp);
-			smem_sml[thd_id_inwarp] = value2;//由此smem里面是这个block内一定范围的累加和
-			break;
-
-		case 1:
-			value2 = smem_mid[thd_id_inwarp] *
-				(thd_id_inwarp < warp_count_inblk);
-			warp_scan_inc<data_t, index_t>
-				(value2, thd_id_inwarp);
-			smem_mid[thd_id_inwarp] = value2;
-			break;	
-
-		case 2:
-			value2 = smem_lrg[thd_id_inwarp] *
-				(thd_id_inwarp < warp_count_inblk);
-			warp_scan_inc<data_t, index_t>
-				(value2, thd_id_inwarp);
-			smem_lrg[thd_id_inwarp] = value2;
-			break;
-
-		default:
-			break;
-
-	}
-	__syncthreads();
-	
-	//Grid scan: use atomic operatin to do grid scan
-	int my_sum;
-	switch (warp_id_inblk)
-	{//block的前三个warp取来分别操作SML
-		case 0:
-			my_sum = smem_sml[warp_count_inblk - 1];
-			if(!thd_id_inwarp)
-			{
-				my_cta_off_sml = atomicAdd((int *)
-					total_sz_sml, my_sum);
-				smem_sml[warp_count_inblk] = 
-					my_cta_off_sml;//把公用信息存在smem
-			}
-			break;
-
-		case 1:
-			my_sum = smem_mid[warp_count_inblk - 1];
-			if(!thd_id_inwarp)
-			{
-				my_cta_off_mid = atomicAdd((int *)
-					total_sz_mid, my_sum);
-				smem_mid[warp_count_inblk] = 
-					my_cta_off_mid;
-			}
-			break;
-
-		case 2:
-			my_sum = smem_lrg[warp_count_inblk - 1];
-			if(!thd_id_inwarp)
-			{
-				my_cta_off_lrg = atomicAdd((int *)
-					total_sz_lrg, my_sum);
-				smem_lrg[warp_count_inblk] = 
-					my_cta_off_lrg;
-			}
-			break;
-
-		default:
-			break;
-
-	}
-	__syncthreads();
-	my_cta_off_sml = smem_sml[warp_count_inblk];
-	my_cta_off_mid = smem_mid[warp_count_inblk];
-	my_cta_off_lrg = smem_lrg[warp_count_inblk];
-
-	output_sml = value_sml - input_sml +//分别是线程的off+warp的off
-		smem_sml[warp_id_inblk] - my_warp_sum_sml 
-		+ my_cta_off_sml;
-
-	output_mid = value_mid - input_mid +
-		smem_mid[warp_id_inblk] - my_warp_sum_mid 
-		+ my_cta_off_mid;
-
-	output_lrg = value_lrg - input_lrg +
-		smem_lrg[warp_id_inblk] - my_warp_sum_lrg 
-		+ my_cta_off_lrg;
-
-	__syncthreads();
-}
-
-template<typename data_t, typename index_t>
-__forceinline__ __device__ void _grid_scan_agg_fused(
-		const index_t thd_id_inwarp,
-		const index_t warp_id_inblk,
-		const index_t warp_count_inblk,
-		const data_t input_sml, 
-		const data_t input_mid, 
-		const data_t input_lrg, 
-		data_t &output_sml,
-		data_t &output_mid,
-		data_t &output_lrg,
-		volatile data_t *total_sz_sml,
-		volatile data_t *total_sz_mid,
-		volatile data_t *total_sz_lrg
-){
-	__shared__ data_t smem_sml[32];
-	__shared__ data_t smem_mid[32];
-	__shared__ data_t smem_lrg[32];
-
-	data_t value_sml = input_sml;
-	data_t value_mid = input_mid;
-	data_t value_lrg = input_lrg;
-	
-	data_t my_cta_off_sml;
-	data_t my_cta_off_mid;
-	data_t my_cta_off_lrg;
-
-	//Warp scan: Kogge stone inclusive scan
 	warp_scan_inc<data_t,index_t>(value_sml,thd_id_inwarp);
 	warp_scan_inc<data_t,index_t>(value_mid,thd_id_inwarp);
 	warp_scan_inc<data_t,index_t>(value_lrg,thd_id_inwarp);
@@ -420,20 +146,18 @@ __forceinline__ __device__ void _grid_scan_agg_fused(
 	}
 	__syncthreads();
 
-	// 使用warp shuffle获取当前warp的总和，替代共享内存读取
-	data_t my_warp_sum_sml = __shfl_sync(0xffffffff, value_sml, 31);
-	data_t my_warp_sum_mid = __shfl_sync(0xffffffff, value_mid, 31);
-	data_t my_warp_sum_lrg = __shfl_sync(0xffffffff, value_lrg, 31);
+	data_t my_warp_sum_sml = smem_sml[warp_id_inblk];
+	data_t my_warp_sum_mid = smem_mid[warp_id_inblk];
+	data_t my_warp_sum_lrg = smem_lrg[warp_id_inblk];
 	
 	__syncthreads();
-	//CTA scan: use warp scan to do CTA scan
+
 	data_t value2; 
 	switch (warp_id_inblk)
 	{
 		case 0:
 			value2 = smem_sml[thd_id_inwarp] *
-								(thd_id_inwarp < warp_count_inblk);
-
+				(thd_id_inwarp < warp_count_inblk);
 			warp_scan_inc<data_t, index_t>
 				(value2, thd_id_inwarp);
 			smem_sml[thd_id_inwarp] = value2;
@@ -441,8 +165,7 @@ __forceinline__ __device__ void _grid_scan_agg_fused(
 
 		case 1:
 			value2 = smem_mid[thd_id_inwarp] *
-								(thd_id_inwarp < warp_count_inblk);
-
+				(thd_id_inwarp < warp_count_inblk);
 			warp_scan_inc<data_t, index_t>
 				(value2, thd_id_inwarp);
 			smem_mid[thd_id_inwarp] = value2;
@@ -450,8 +173,7 @@ __forceinline__ __device__ void _grid_scan_agg_fused(
 
 		case 2:
 			value2 = smem_lrg[thd_id_inwarp] *
-								(thd_id_inwarp < warp_count_inblk);
-
+				(thd_id_inwarp < warp_count_inblk);
 			warp_scan_inc<data_t, index_t>
 				(value2, thd_id_inwarp);
 			smem_lrg[thd_id_inwarp] = value2;
@@ -463,7 +185,6 @@ __forceinline__ __device__ void _grid_scan_agg_fused(
 	}
 	__syncthreads();
 	
-	//Grid scan: use atomic operatin to do grid scan
 	int my_sum;
 	switch (warp_id_inblk)
 	{
@@ -523,8 +244,6 @@ __forceinline__ __device__ void _grid_scan_agg_fused(
 
 	__syncthreads();
 }
-
-
 
 template<typename data_t, typename index_t>
 __global__ void grid_scan(meta_data mdata){
