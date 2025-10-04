@@ -298,7 +298,7 @@ sh sh/additional_exp/exp_D-TrimCDP-WB-no_kernel_fusion.sh
 The command to run this experiment is:
 
 ```
-sh sh/additional_exp/D-TrimCDP-WB-no_global_memory_coalescing.sh
+sh sh/additional_exp/exp_D-TrimCDP-WB-no_global_memory_coalescing.sh
 ```
 
 #### Multi-core CPU Algorithms
