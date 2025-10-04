@@ -62,15 +62,17 @@ int main(int argc, char** argv){
 			<<"reverse_the_edge(1 reverse, 0 not reverse) lines_to_skip\n";
 	if(argc<4){printf("Wrong input\n");exit(-1);}
 	
-	size_t file_size = fsize(argv[1]);
+	char input[100];
+	snprintf(input, sizeof(input), "%s.in", argv[1]);
+	
+	size_t file_size = fsize(input);
 	bool is_reverse=(atol(argv[2])==1);	
 	long skip_head=atol(argv[3]);
-	
 
-	fd=open(argv[1],O_CREAT|O_RDWR,00666 );
+	fd=open(input,O_CREAT|O_RDWR,00666 );
 	if(fd == -1)
 	{
-		printf("%s open error\n", argv[1]);
+		printf("%s open error\n", input);
 		perror("open");
 		exit(-1);
 	}

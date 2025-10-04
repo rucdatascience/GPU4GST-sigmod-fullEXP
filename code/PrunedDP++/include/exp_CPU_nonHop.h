@@ -80,7 +80,7 @@ void exp_CPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"result/exp_CPU_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"result/PrunedDP++_CPU_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 	outputFile << "task_ID,task,CPU_nonHop_time,CPU_nonHop_cost,CPU_nonHop_memory,counts,process_num" << endl;
 	std::cout << task_start_num<<" "<<task_end_num << endl;
 	for (int i = task_start_num; i <= task_end_num; i++)
