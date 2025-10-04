@@ -80,7 +80,7 @@ void exp_GPU_nonHop(string path, string data_name, int T, int task_start_num, in
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"rerun_result/new_exp_GPU1_nonHop_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"result/TrimCDP_" + data_name + "_T" + to_string(T) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU1_nonHop_time,GPU_nonHop_cost,GPU_nonHop_memory,counts,process_num,mid_counts,mid_process_num,mid_time" << endl;
 	node **host_tree;

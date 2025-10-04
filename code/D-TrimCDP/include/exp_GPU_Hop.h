@@ -74,7 +74,7 @@ void exp_GPU_Hop(string path, string data_name, int T, int D, int task_start_num
 	outputFile.precision(8);
 	outputFile.setf(ios::fixed);
 	outputFile.setf(ios::showpoint);
-	outputFile.open(path+"rerun_result/new_exp_GPU1_Hop_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
+	outputFile.open(path+"result/D-TrimCDP_" + data_name + "_T" + to_string(T) + "_" + "D" + to_string(D) + "_" + to_string(task_start_num) + "-" + to_string(task_end_num) + ".csv");
 
 	outputFile << "task_ID,task,GPU1_Hop_time,GPU1_Hop_cost,GPU1_Hop_memory,counts,process_num,mid_counts,mid_process_num,mid_time" << endl;
 

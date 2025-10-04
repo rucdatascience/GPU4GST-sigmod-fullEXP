@@ -168,26 +168,26 @@ sh sh/exp_D-TrimCDP-WB.sh
 
 > This is the TrimCDP-WB version code without virtual splitting optimization, with diameter constraints.
 
-- "TrimCDP-WB-no_virtual_split/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB without virtual splitting optimization.
-- "TrimCDP-WB-no_virtual_split/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB without virtual splitting.
-- "TrimCDP-WB-no_virtual_split/include/mapper.cuh" contains codes for performing specific operations on vertices without virtual splitting.
-- "TrimCDP-WB-no_virtual_split/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+- "D-TrimCDP-WB-no_virtual_split/src/GPUHop.cu" contains codes for conducting experiments for D-TrimCDP-WB without virtual splitting optimization.
+- "D-TrimCDP-WB-no_virtual_split/include/mapper_enactor.cuh" contains the overall framework of D-TrimCDP-WB without virtual splitting.
+- "D-TrimCDP-WB-no_virtual_split/include/mapper.cuh" contains codes for performing specific operations on vertices without virtual splitting.
+- "D-TrimCDP-WB-no_virtual_split/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
 
 The command to run this experiment is:
-
- ```
-sh sh/exp_TrimCDP-WB-no_virtual_split.sh
- ```
+```
+sh sh/exp_D-TrimCDP-WB-no_virtual_split.sh
+```
 
 ### Additional experiments
 
 #### GPU：Without diameter constraints
 
-| Algorithm Variant                                            | Kernel Fusion | shared_memory_prefix_scan | Global Memory Coalescing | Description                                                  |
-| ------------------------------------------------------------ | ------------- | ------------------------- | ------------------------ | ------------------------------------------------------------ |
-| **TrimCDP-WB-kernel_fusion-shared_memory_prefix_scan-global_memory_coalescing** | ✓             | ✓                         | ✓                        | kernel fusion, shared memory prefix scan, global memory coalescing |
-| **TrimCDP-WB-kernel_fusion-no_shared_memory_prefix_scan-global_memory_coalescing** | ✓             | ✗                         | ✓                        | kernel fusion, global memory coalescing, no shared memory prefix scan |
-| **TrimCDP-WB-no_kernel_fusion**                              | ✗             | ✗                         | ✓                        | no kernel fusion, no shared memory prefix scan, global memory coalescing |
+| Algorithm Variant | Kernel Fusion | shared_memory_prefix_scan | Global Memory Coalescing | Description |
+|-------------------|---------------|--------------------------|-------------------------|-------------|
+| **TrimCDP-WB-kernel_fusion-shared_memory_prefix_scan-global_memory_coalescing** | ✓ | ✓ | ✓ | kernel fusion, shared memory prefix scan, global memory coalescing |
+| **TrimCDP-WB-kernel_fusion-no_shared_memory_prefix_scan-global_memory_coalescing** | ✓ | ✗ | ✓ | kernel fusion, global memory coalescing, no shared memory prefix scan |
+| **TrimCDP-WB-no_kernel_fusion** | ✗ | ✗ | ✓ | no kernel fusion, no shared memory prefix scan, global memory coalescing |
+| **TrimCDP-WB-no_global_memory_coalescing** | ✓ | ✗ | ✗ | kernel fusion, no shared memory prefix scan, no global memory coalescing |
 
 ##### TrimCDP-WB-kernel_fusion-shared_memory_prefix_scan-global_memory_coalescing
 
@@ -226,6 +226,18 @@ The command to run this experiment is:
 
 ```
 sh sh/additional_exp/exp_TrimCDP-WB-no_kernel_fusion.sh
+```
+
+##### TrimCDP-WB-no_global_memory_coalescing
+
+- "TrimCDP-WB-no_global_memory_coalescing/src/GSTnonHop.cu" contains codes for conducting experiments for TrimCDP-WB with kernel fusion but without global memory coalescing.
+- "TrimCDP-WB-no_global_memory_coalescing/include/mapper_enactor.cuh" contains the overall framework of TrimCDP-WB without global memory coalescing.
+- "TrimCDP-WB-no_global_memory_coalescing/include/mapper.cuh" contains codes for performing specific operations on vertices without global memory coalescing.
+- "TrimCDP-WB-no_global_memory_coalescing/include/reducer.cuh" contains codes for organizing and allocating work after completing vertices operations.
+
+The command to run this experiment is:
+```
+sh sh/additional_exp/exp_TrimCDP-WB-no_global_memory_coalescing.sh
 ```
 
 #### GPU：With diameter constraints

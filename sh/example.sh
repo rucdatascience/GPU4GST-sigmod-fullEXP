@@ -1,4 +1,4 @@
-#sh sh/example.sh
+# sh sh/example.sh
 cd code/D-PrunedDP++
 mkdir build
 cd build

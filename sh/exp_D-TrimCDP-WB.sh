@@ -1,4 +1,6 @@
-cd code/D-TrimCDP-WB/build
+cd code/D-TrimCDP-WB
+mkdir build
+cd build
 cmake ..
 make
 #sh sh/exp_D-TrimCDP-WB.sh
