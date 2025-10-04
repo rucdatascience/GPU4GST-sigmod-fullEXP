@@ -1,6 +1,8 @@
 build
 .vscode
 .idea
+data/*
+!data/result
 data/result/*
 !data/result/.gitkeep
 !data/tuple_text_to_bin.cpp
